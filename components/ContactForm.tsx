@@ -36,24 +36,23 @@ const NEWSLETTER_URL = "https://unpibedecompu.substack.com";
 const REPO_URL =
   "https://github.com/fourofclubs001/unpibedecompu/tree/master/strategy/contacta_representante_latam";
 
-const BLUEDOT_COURSES = [
-  {
-    name: "El futuro de la IA",
-    audience: "Para empezar, sin conocimientos técnicos",
-    url: "https://bluedot.org/courses/future-of-ai",
-    image: "/bluedot/future-of-ai.png",
-  },
+const PRIMARY_COURSE = {
+  name: "El futuro de la IA",
+  audience: "2 horas · en inglés · sin conocimientos técnicos",
+  url: "https://bluedot.org/courses/future-of-ai",
+  image: "/bluedot/future-of-ai.png",
+};
+
+const SECONDARY_COURSES = [
   {
     name: "Technical AI Safety",
     audience: "Para perfiles técnicos",
     url: "https://bluedot.org/courses/technical-ai-safety",
-    image: "/bluedot/technical-ai-safety.png",
   },
   {
     name: "Frontier AI Governance",
     audience: "Para perfiles de política pública",
     url: "https://bluedot.org/courses/ai-governance",
-    image: "/bluedot/frontier-ai-governance.png",
   },
 ];
 
@@ -118,6 +117,7 @@ export default function ContactForm({ countries, representatives }: Props) {
   const [subjectEdited, setSubjectEdited] = useState(false);
 
   const [lastSent, setLastSent] = useState<Representative | null>(null);
+  const [confirmedSent, setConfirmedSent] = useState(false);
   const [copied, setCopied] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [isAndroid, setIsAndroid] = useState(false);
@@ -192,11 +192,21 @@ export default function ContactForm({ countries, representatives }: Props) {
 
   function handleContactOpened(rep: Representative, via: "gmail" | "outlook" | "form") {
     setLastSent(rep);
+    setConfirmedSent(false);
     trackFunnel("email_client_opened", {
       country: countryCode ?? "?",
       office: rep.office,
       channel: rep.channel ?? "email",
       provider: via,
+    });
+  }
+
+  function handleConfirmSent() {
+    if (!lastSent || confirmedSent) return;
+    setConfirmedSent(true);
+    trackFunnel("email_sent_confirmed", {
+      office: lastSent.office,
+      channel: lastSent.channel ?? "email",
     });
   }
 
@@ -229,7 +239,7 @@ export default function ContactForm({ countries, representatives }: Props) {
     await writeClipboard(text);
   }
 
-  function handleShare(network: "x" | "facebook" | "whatsapp") {
+  function handleShare(network: "x" | "facebook" | "whatsapp", location: "step3" | "step4" = "step4") {
     const url =
       network === "x"
         ? buildShareX(SHARE_TEXT, SHARE_URL)
@@ -237,7 +247,7 @@ export default function ContactForm({ countries, representatives }: Props) {
           ? buildShareFacebook(SHARE_URL)
           : buildShareWhatsApp(`${SHARE_TEXT} ${SHARE_URL}`);
     window.open(url, "_blank", "noopener,noreferrer");
-    trackFunnel("shared", { network });
+    trackFunnel("shared", { network, location });
   }
 
   /* ----------------------------- STEP 1 ----------------------------- */
@@ -520,19 +530,56 @@ export default function ContactForm({ countries, representatives }: Props) {
         )}
 
         {lastSent && (
-          <p className="mt-4 rounded-lg bg-ink/5 p-3 text-sm text-ink/70">
-            ¿No se abrió?{" "}
+          <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 rounded-lg bg-ink/5 p-3 text-sm text-ink/70">
             <button
               type="button"
-              onClick={handleCopyFallback}
-              className="font-semibold text-accent-dark underline"
+              onClick={handleConfirmSent}
+              disabled={confirmedSent}
+              className="font-semibold text-accent-dark underline disabled:text-ink/40 disabled:no-underline"
             >
-              {copied ? "¡Copiado!" : "Copiá el mensaje"}
-            </button>{" "}
-            y pegalo en un mail nuevo
-            {lastSent?.channel !== "form" && lastSent
-              ? ` a ${lastSent.email}`
-              : ""}
+              {confirmedSent ? "✓ Confirmado, gracias" : "Ya lo mandé"}
+            </button>
+            <span className="text-ink/30">·</span>
+            <span>
+              ¿No se abrió?{" "}
+              <button
+                type="button"
+                onClick={handleCopyFallback}
+                className="font-semibold text-accent-dark underline"
+              >
+                {copied ? "¡Copiado!" : "Copiá el mensaje"}
+              </button>{" "}
+              y pegalo en un mail nuevo
+              {lastSent?.channel !== "form" && lastSent
+                ? ` a ${lastSent.email}`
+                : ""}
+              .
+            </span>
+          </div>
+        )}
+
+        {lastSent && (
+          <p className="mt-3 text-sm text-ink/50">
+            Mientras tanto:{" "}
+            <a
+              href={PRIMARY_COURSE.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() =>
+                trackFunnel("course_clicked", { course: PRIMARY_COURSE.name, location: "step3" })
+              }
+              className="font-medium text-ink/70 underline underline-offset-2 hover:text-accent-dark"
+            >
+              curso gratis de 2hs sobre riesgos de IA
+            </a>{" "}
+            o{" "}
+            <button
+              type="button"
+              onClick={() => handleShare("whatsapp", "step3")}
+              className="font-medium text-ink/70 underline underline-offset-2 hover:text-accent-dark"
+            >
+              compartí esto
+            </button>
             .
           </p>
         )}
@@ -608,39 +655,57 @@ export default function ContactForm({ countries, representatives }: Props) {
 
       <div className="mt-8 border-t border-ink/10 pt-6">
         <p className="text-sm font-semibold uppercase tracking-wide text-ink/50">
-          Cursos gratuitos
+          Educate gratis
         </p>
         <p className="mx-auto mt-2 max-w-md text-sm text-ink/70">
-          BlueDot Impact da cursos gratuitos, en inglés, sobre los riesgos de
-          la IA y cómo reducirlos.
+          BlueDot Impact da cursos gratuitos sobre los riesgos de la IA y
+          cómo reducirlos.
         </p>
-        <ul className="mt-4 grid grid-cols-1 gap-3 text-left sm:grid-cols-3">
-          {BLUEDOT_COURSES.map((course) => (
-            <li key={course.url}>
+
+        <a
+          href={PRIMARY_COURSE.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={() =>
+            trackFunnel("course_clicked", { course: PRIMARY_COURSE.name, location: "step4" })
+          }
+          className="mx-auto mt-4 flex max-w-md flex-col overflow-hidden rounded-xl border border-ink/15 text-left transition hover:border-accent hover:shadow-md sm:flex-row"
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element -- export estático, sin optimizador */}
+          <img
+            src={PRIMARY_COURSE.image}
+            alt={`Curso ${PRIMARY_COURSE.name} de BlueDot`}
+            className="aspect-[8/7] w-full object-cover sm:w-40"
+          />
+          <div className="flex flex-1 flex-col p-3">
+            <span className="text-base font-semibold">{PRIMARY_COURSE.name}</span>
+            <span className="mb-3 mt-0.5 text-xs text-ink/60">{PRIMARY_COURSE.audience}</span>
+            <span className="mt-auto inline-block self-start rounded-full bg-accent px-3 py-1.5 text-sm font-semibold text-ink">
+              Empezar el curso →
+            </span>
+          </div>
+        </a>
+
+        <p className="mx-auto mt-3 max-w-md text-sm text-ink/60">
+          ¿Perfil técnico o de política pública? Hay cursos más específicos:{" "}
+          {SECONDARY_COURSES.map((course, i) => (
+            <span key={course.url}>
               <a
                 href={course.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                onClick={() => trackFunnel("course_clicked", { course: course.name })}
-                className="flex h-full flex-col overflow-hidden rounded-xl border border-ink/15 transition hover:border-accent hover:shadow-md"
+                onClick={() =>
+                  trackFunnel("course_clicked", { course: course.name, location: "step4" })
+                }
+                className="font-medium underline underline-offset-2 hover:text-accent-dark"
               >
-                {/* eslint-disable-next-line @next/next/no-img-element -- export estático, sin optimizador */}
-                <img
-                  src={course.image}
-                  alt={`Curso ${course.name} de BlueDot`}
-                  className="aspect-[8/7] w-full object-cover"
-                />
-                <div className="flex flex-1 flex-col p-3">
-                  <span className="text-sm font-semibold">{course.name}</span>
-                  <span className="mb-3 mt-0.5 text-xs text-ink/60">{course.audience}</span>
-                  <span className="mt-auto inline-block self-start rounded-full bg-accent/10 px-3 py-1.5 text-sm font-semibold text-accent-dark">
-                    Ver curso
-                  </span>
-                </div>
+                {course.name}
               </a>
-            </li>
+              {i < SECONDARY_COURSES.length - 1 ? " · " : ""}
+            </span>
           ))}
-        </ul>
+          .
+        </p>
       </div>
 
       <div className="mt-8 border-t border-ink/10 pt-6">
