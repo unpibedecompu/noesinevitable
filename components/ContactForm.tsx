@@ -15,6 +15,8 @@ import {
   buildShareWhatsApp,
 } from "@/lib/mailto";
 import { trackFunnel } from "@/lib/analytics";
+import { PRIMARY_COURSE, SECONDARY_COURSES } from "@/lib/courses";
+import { SHARE_URL, SHARE_TEXT } from "@/lib/share";
 import siteCopy from "@/data/site-copy.json";
 
 const OFFICE_ORDER: Record<string, number> = {
@@ -27,34 +29,10 @@ const OFFICE_ORDER: Record<string, number> = {
   diputado_nacional: 5,
 };
 
-const SHARE_URL = "https://noesinevitable.org";
-const SHARE_TEXT =
-  "Le escribí a mis representantes para pedir gobernanza sobre la IA de frontera. Vos también podés, toma un minuto:";
-
 const INSTAGRAM_URL = "https://www.instagram.com/unpibedecompu/";
 const NEWSLETTER_URL = "https://unpibedecompu.substack.com";
 const REPO_URL =
   "https://github.com/fourofclubs001/unpibedecompu/tree/master/strategy/contacta_representante_latam";
-
-const PRIMARY_COURSE = {
-  name: "El futuro de la IA",
-  audience: "2 horas · en inglés · sin conocimientos técnicos",
-  url: "https://bluedot.org/courses/future-of-ai",
-  image: "/bluedot/future-of-ai.png",
-};
-
-const SECONDARY_COURSES = [
-  {
-    name: "Technical AI Safety",
-    audience: "Para perfiles técnicos",
-    url: "https://bluedot.org/courses/technical-ai-safety",
-  },
-  {
-    name: "Frontier AI Governance",
-    audience: "Para perfiles de política pública",
-    url: "https://bluedot.org/courses/ai-governance",
-  },
-];
 
 const CHIP_CLS =
   "rounded-full bg-accent px-3 py-1.5 text-sm font-semibold text-ink transition hover:bg-accent-dark";
@@ -239,7 +217,7 @@ export default function ContactForm({ countries, representatives }: Props) {
     await writeClipboard(text);
   }
 
-  function handleShare(network: "x" | "facebook" | "whatsapp", location: "step3" | "step4" = "step4") {
+  function handleShare(network: "x" | "facebook" | "whatsapp") {
     const url =
       network === "x"
         ? buildShareX(SHARE_TEXT, SHARE_URL)
@@ -247,7 +225,7 @@ export default function ContactForm({ countries, representatives }: Props) {
           ? buildShareFacebook(SHARE_URL)
           : buildShareWhatsApp(`${SHARE_TEXT} ${SHARE_URL}`);
     window.open(url, "_blank", "noopener,noreferrer");
-    trackFunnel("shared", { network, location });
+    trackFunnel("shared", { network, location: "step4" });
   }
 
   /* ----------------------------- STEP 1 ----------------------------- */
@@ -558,32 +536,6 @@ export default function ContactForm({ countries, representatives }: Props) {
           </div>
         )}
 
-        {lastSent && (
-          <p className="mt-3 text-sm text-ink/50">
-            Mientras tanto:{" "}
-            <a
-              href={PRIMARY_COURSE.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() =>
-                trackFunnel("course_clicked", { course: PRIMARY_COURSE.name, location: "step3" })
-              }
-              className="font-medium text-ink/70 underline underline-offset-2 hover:text-accent-dark"
-            >
-              curso gratis de 2hs sobre riesgos de IA
-            </a>{" "}
-            o{" "}
-            <button
-              type="button"
-              onClick={() => handleShare("whatsapp", "step3")}
-              className="font-medium text-ink/70 underline underline-offset-2 hover:text-accent-dark"
-            >
-              compartí esto
-            </button>
-            .
-          </p>
-        )}
-
         <button
           type="button"
           onClick={() => {
@@ -686,10 +638,12 @@ export default function ContactForm({ countries, representatives }: Props) {
           </div>
         </a>
 
-        <p className="mx-auto mt-3 max-w-md text-sm text-ink/60">
-          ¿Perfil técnico o de política pública? Hay cursos más específicos:{" "}
-          {SECONDARY_COURSES.map((course, i) => (
-            <span key={course.url}>
+        <p className="mx-auto mt-5 max-w-md text-xs font-semibold uppercase tracking-wide text-ink/40">
+          ¿Perfil técnico o de política pública?
+        </p>
+        <ul className="mx-auto mt-2 grid max-w-md grid-cols-2 gap-2 text-left">
+          {SECONDARY_COURSES.map((course) => (
+            <li key={course.url}>
               <a
                 href={course.url}
                 target="_blank"
@@ -697,20 +651,30 @@ export default function ContactForm({ countries, representatives }: Props) {
                 onClick={() =>
                   trackFunnel("course_clicked", { course: course.name, location: "step4" })
                 }
-                className="font-medium underline underline-offset-2 hover:text-accent-dark"
+                className="flex h-full flex-col overflow-hidden rounded-lg border border-ink/15 transition hover:border-accent hover:shadow-md"
               >
-                {course.name}
+                {/* eslint-disable-next-line @next/next/no-img-element -- export estático, sin optimizador */}
+                <img
+                  src={course.image}
+                  alt={`Curso ${course.name} de BlueDot`}
+                  className="aspect-[8/5] w-full object-cover"
+                />
+                <div className="flex flex-1 flex-col p-2">
+                  <span className="text-xs font-semibold">{course.name}</span>
+                  <span className="mb-2 mt-0.5 text-[11px] text-ink/60">{course.audience}</span>
+                  <span className="mt-auto inline-block self-start rounded-full bg-accent/10 px-2 py-1 text-[11px] font-semibold text-accent-dark">
+                    Empezar curso →
+                  </span>
+                </div>
               </a>
-              {i < SECONDARY_COURSES.length - 1 ? " · " : ""}
-            </span>
+            </li>
           ))}
-          .
-        </p>
+        </ul>
       </div>
 
       <div className="mt-8 border-t border-ink/10 pt-6">
         <p className="text-sm font-semibold uppercase tracking-wide text-ink/50">
-          Seguime
+          Mantenete informado
         </p>
         <p className="mx-auto mt-2 max-w-md text-sm text-ink/70">
           {siteCopy.seguimeDescription}
