@@ -1,6 +1,7 @@
 import { COUNTRIES, COUNTRY_CODES } from "@/lib/countries";
 import { getRepresentatives } from "@/lib/representatives";
 import ContactForm from "@/components/ContactForm";
+import MeanwhileTeaser from "@/components/MeanwhileTeaser";
 import siteCopy from "@/data/site-copy.json";
 
 // Página 100% estática. La detección de país pasó al cliente
@@ -26,10 +27,11 @@ export default function Page() {
           href={siteCopy.explanationSourceUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-1 inline-block text-sm font-medium text-accent-dark underline underline-offset-2"
+          className="mt-1 block text-sm font-medium text-accent-dark underline underline-offset-2"
         >
           {siteCopy.explanationSourceLabel}
         </a>
+        <MeanwhileTeaser />
       </header>
 
       {unverified > 0 && (

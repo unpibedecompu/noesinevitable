@@ -20,6 +20,7 @@ export type FunnelEvent =
   | "body_edited"
   | "finish_clicked"
   | "email_client_opened"
+  | "email_sent_confirmed"
   | "email_didnt_open_clicked"
   | "shared"
   | "course_clicked"
