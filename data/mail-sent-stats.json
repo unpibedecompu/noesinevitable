@@ -1,0 +1,8 @@
+{
+  "updatedAt": "2026-09-18",
+  "note": "Carga manual desde el dashboard de Umami (evento email_sent_confirmed no tiene la propiedad país todavía — ver lib/analytics.ts). Actualizar a mano hasta que se instrumente.",
+  "byCountry": [
+    { "code": "AR", "count": 10 },
+    { "code": "UY", "count": 1 }
+  ]
+}

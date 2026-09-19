@@ -1,4 +1,5 @@
 import { COUNTRIES, COUNTRY_CODES } from "@/lib/countries";
+import Link from "next/link";
 import { getRepresentatives } from "@/lib/representatives";
 import ContactForm from "@/components/ContactForm";
 import MeanwhileTeaser from "@/components/MeanwhileTeaser";
@@ -50,6 +51,11 @@ export default function Page() {
           El mail se abre en tu propio cliente de correo (Gmail, Outlook,
           la app de tu celular). No mandamos nada por vos y no guardamos tus
           datos. Sólo contamos cuántas personas llegan a la pantalla de envío.
+        </p>
+        <p className="mt-2">
+          <Link href="/home" className="font-semibold text-accent-dark underline">
+            Sobre este proyecto →
+          </Link>
         </p>
       </footer>
     </main>

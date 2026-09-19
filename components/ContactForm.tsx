@@ -15,9 +15,9 @@ import {
   buildShareWhatsApp,
 } from "@/lib/mailto";
 import { trackFunnel } from "@/lib/analytics";
-import { PRIMARY_COURSE, SECONDARY_COURSES } from "@/lib/courses";
 import { SHARE_URL, SHARE_TEXT } from "@/lib/share";
-import siteCopy from "@/data/site-copy.json";
+import CoursesSection from "@/components/CoursesSection";
+import FollowSection from "@/components/FollowSection";
 
 const OFFICE_ORDER: Record<string, number> = {
   presidente: 0,
@@ -29,8 +29,6 @@ const OFFICE_ORDER: Record<string, number> = {
   diputado_nacional: 5,
 };
 
-const INSTAGRAM_URL = "https://www.instagram.com/unpibedecompu/";
-const NEWSLETTER_URL = "https://unpibedecompu.substack.com";
 const REPO_URL =
   "https://github.com/fourofclubs001/unpibedecompu/tree/master/strategy/contacta_representante_latam";
 
@@ -606,99 +604,11 @@ export default function ContactForm({ countries, representatives }: Props) {
       </div>
 
       <div className="mt-8 border-t border-ink/10 pt-6">
-        <p className="text-sm font-semibold uppercase tracking-wide text-ink/50">
-          Educate gratis
-        </p>
-        <p className="mx-auto mt-2 max-w-md text-sm text-ink/70">
-          BlueDot Impact da cursos gratuitos sobre los riesgos de la IA y
-          cómo reducirlos.
-        </p>
-
-        <a
-          href={PRIMARY_COURSE.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={() =>
-            trackFunnel("course_clicked", { course: PRIMARY_COURSE.name, location: "step4" })
-          }
-          className="mx-auto mt-4 flex max-w-md flex-col overflow-hidden rounded-xl border border-ink/15 text-left transition hover:border-accent hover:shadow-md sm:flex-row"
-        >
-          {/* eslint-disable-next-line @next/next/no-img-element -- export estático, sin optimizador */}
-          <img
-            src={PRIMARY_COURSE.image}
-            alt={`Curso ${PRIMARY_COURSE.name} de BlueDot`}
-            className="aspect-[8/7] w-full object-cover sm:w-40"
-          />
-          <div className="flex flex-1 flex-col p-3">
-            <span className="text-base font-semibold">{PRIMARY_COURSE.name}</span>
-            <span className="mb-3 mt-0.5 text-xs text-ink/60">{PRIMARY_COURSE.audience}</span>
-            <span className="mt-auto inline-block self-start rounded-full bg-accent px-3 py-1.5 text-sm font-semibold text-ink">
-              Empezar el curso →
-            </span>
-          </div>
-        </a>
-
-        <p className="mx-auto mt-5 max-w-md text-xs font-semibold uppercase tracking-wide text-ink/40">
-          ¿Perfil técnico o de política pública?
-        </p>
-        <ul className="mx-auto mt-2 grid max-w-md grid-cols-2 gap-2 text-left">
-          {SECONDARY_COURSES.map((course) => (
-            <li key={course.url}>
-              <a
-                href={course.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() =>
-                  trackFunnel("course_clicked", { course: course.name, location: "step4" })
-                }
-                className="flex h-full flex-col overflow-hidden rounded-lg border border-ink/15 transition hover:border-accent hover:shadow-md"
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element -- export estático, sin optimizador */}
-                <img
-                  src={course.image}
-                  alt={`Curso ${course.name} de BlueDot`}
-                  className="aspect-[8/5] w-full object-cover"
-                />
-                <div className="flex flex-1 flex-col p-2">
-                  <span className="text-xs font-semibold">{course.name}</span>
-                  <span className="mb-2 mt-0.5 text-[11px] text-ink/60">{course.audience}</span>
-                  <span className="mt-auto inline-block self-start rounded-full bg-accent/10 px-2 py-1 text-[11px] font-semibold text-accent-dark">
-                    Empezar curso →
-                  </span>
-                </div>
-              </a>
-            </li>
-          ))}
-        </ul>
+        <CoursesSection location="step4" />
       </div>
 
       <div className="mt-8 border-t border-ink/10 pt-6">
-        <p className="text-sm font-semibold uppercase tracking-wide text-ink/50">
-          Mantenete informado
-        </p>
-        <p className="mx-auto mt-2 max-w-md text-sm text-ink/70">
-          {siteCopy.seguimeDescription}
-        </p>
-        <div className="mt-3 flex flex-wrap justify-center gap-2">
-          <a
-            href={INSTAGRAM_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={() => trackFunnel("social_link_clicked", { network: "instagram" })}
-            className="rounded-full border border-ink/20 px-4 py-2 text-sm font-semibold hover:bg-ink/5"
-          >
-            Instagram
-          </a>
-          <a
-            href={NEWSLETTER_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={() => trackFunnel("social_link_clicked", { network: "newsletter" })}
-            className="rounded-full border border-ink/20 px-4 py-2 text-sm font-semibold hover:bg-ink/5"
-          >
-            Newsletter
-          </a>
-        </div>
+        <FollowSection location="step4" />
       </div>
 
       <button
