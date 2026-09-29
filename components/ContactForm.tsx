@@ -93,6 +93,9 @@ export default function ContactForm({ countries, representatives }: Props) {
   const [subjectEdited, setSubjectEdited] = useState(false);
 
   const [lastSent, setLastSent] = useState<Representative | null>(null);
+  // Representantes a los que ya se les abrió el mail (repKey). Sobrevive a
+  // los cambios de paso para que el ✓ siga visible al volver al paso 3.
+  const [openedKeys, setOpenedKeys] = useState<Set<string>>(() => new Set());
   const [confirmedSent, setConfirmedSent] = useState(false);
   const [copied, setCopied] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -168,6 +171,7 @@ export default function ContactForm({ countries, representatives }: Props) {
 
   function handleContactOpened(rep: Representative, via: "gmail" | "outlook" | "form") {
     setLastSent(rep);
+    setOpenedKeys((prev) => new Set(prev).add(repKey(rep)));
     setConfirmedSent(false);
     trackFunnel("email_client_opened", {
       country: countryCode ?? "?",
@@ -431,24 +435,39 @@ export default function ContactForm({ countries, representatives }: Props) {
             };
             const btnCls =
               "rounded-full bg-accent/10 px-3 py-1.5 text-sm font-semibold text-accent-dark transition hover:bg-accent/20";
+            const opened = openedKeys.has(repKey(rep));
+            // Ya enviado: se atenúa pero sigue clickeable (por si no se abrió
+            // o quiere reenviar); al pasar el mouse vuelve a opacidad plena.
+            const fadeCls = opened ? "opacity-40 transition hover:opacity-100" : "";
             return (
               <li
                 key={repKey(rep)}
-                className="flex flex-col gap-2 rounded-lg border border-ink/15 px-3 py-2.5 transition sm:flex-row sm:items-center sm:justify-between"
+                className={`flex flex-col gap-2 rounded-lg border px-3 py-2.5 transition sm:flex-row sm:items-center sm:justify-between ${
+                  opened ? "border-ink/10 bg-ink/[0.02]" : "border-ink/15"
+                }`}
               >
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="truncate text-sm font-semibold">
+                <div className="flex min-w-0 items-center gap-2">
+                  {opened && (
+                    <span
+                      className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-accent text-xs font-bold text-ink"
+                      title="Ya le abriste el mail"
+                      aria-label="Ya le abriste el mail"
+                    >
+                      ✓
+                    </span>
+                  )}
+                  <div className={`min-w-0 ${fadeCls}`}>
+                    <span className="block truncate text-sm font-semibold">
                       {rep.name}
                     </span>
+                    <span className="block truncate text-xs text-ink/60">
+                      {repSubtitle(rep)}
+                      {rep.channel === "form" ? " · por formulario web" : ""}
+                    </span>
                   </div>
-                  <span className="block truncate text-xs text-ink/60">
-                    {repSubtitle(rep)}
-                    {rep.channel === "form" ? " · por formulario web" : ""}
-                  </span>
                 </div>
 
-                <div className="flex shrink-0 items-center gap-3">
+                <div className={`flex shrink-0 items-center gap-3 ${fadeCls}`}>
                   {rep.channel === "form" ? (
                     <button
                       type="button"

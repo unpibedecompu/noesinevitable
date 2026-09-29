@@ -1,6 +1,6 @@
 # Estado del proyecto
 
-Última actualización: 2026-09-11.
+Última actualización: 2026-09-29.
 
 ## Deploy
 
@@ -92,9 +92,60 @@
   `window.umami`, `window.plausible`, `window.gtag` o `window.fathom`, el
   que esté cargado. Hoy solo Umami está cargado.
 
-## Pendientes / ideas sueltas para retomar
+## Envío de mails
 
+- **Decisión 2026-09-29:** se descarta que la página envíe los mails desde
+  un backend. Se sigue usando el proveedor de mail del usuario (Gmail /
+  Outlook / app nativa), **un mail por representante**, cada uno con su
+  botón. Motivos en `PROJECT_SPEC.md` → "Decisión (2026-09-29)".
+- En el paso 3, al abrir el mail para un representante su tarjeta queda con
+  un ✓ y el nombre, la descripción y los botones se atenúan (siguen
+  clickeables por si el mail no se abrió). Inspirado en ControlAI. El ✓
+  significa "se abrió el mail", no "se envió".
+
+## Próximos pasos
+
+- [ ] **Dirección de tracking en CC** (ej. `registro@noesinevitable.org`)
+      para contar envíos reales y no sólo clicks:
+      - Cloudflare Email Routing en `noesinevitable.org` (ojo: reemplaza los
+        MX si el dominio ya recibe mail en otro lado).
+      - Email Worker que lea el `To`, lo matchee contra
+        `representatives.json`, sume un contador por representante/país y
+        descarte el mail (sin guardar contenido ni direcciones).
+      - Agregar `cc` a los links de `lib/mailto.ts` (Gmail web, Outlook web,
+        `mailto:`, deep links mobile — probar en dispositivo real).
+      - Explicar el CC en la UI ("para contar cuántos mails se mandan") y en
+        la política de privacidad.
+- [ ] **Revisar los datos que se le piden al usuario** para el mail. Hoy es
+      sólo nombre (+ provincia para filtrar). Evaluar pedir código postal,
+      ciudad u otro dato que haga el mail más creíble como "constituyente"
+      real del representante (ControlAI pide dirección / código postal),
+      sin romper el objetivo de completar en 10-20 segundos.
+- [ ] **Mails personalizados por representante.** Hoy el saludo ya lleva el
+      nombre (`Estimado/a {nombre},`). Extender: título y género correctos
+      (ej. "Estimada Diputada …"), mencionar su cargo / provincia en el
+      cuerpo. También ayuda a que los servidores de las cámaras no filtren
+      como masivos muchos mails idénticos.
+- [ ] **Alarma por mail cuando se acerque el tope de eventos de Umami**
+      (100k/mes en el plan gratis; ver `strategy/estimated_budget.md`).
+      Avisar a `lucasvitali001@gmail.com` al ~70% y ~90% del cupo, para
+      pasar a Pro antes de perder datos en un pico viral. Primero chequear
+      si Umami Cloud trae alertas de uso propias; si no, un Worker de
+      Cloudflare con cron diario que consulte los eventos del mes por la
+      API de Umami Cloud y mande el mail.
 - [ ] Reactivar más países en `lib/countries.ts` cuando haya datos
       verificados (ver `DATA_TODO.md`).
-- [ ] Backend real de envío de mails — explícitamente fuera de alcance por
-      ahora (ver `PROJECT_SPEC.md`), solo si hay funding.
+
+## Para más adelante
+
+- [ ] **Sección "últimas noticias"** — opción de incluir en el mail noticias
+      recientes y relevantes sobre riesgos de IA (ControlAI lo ofrece como
+      checkbox "Include the latest relevant news in my email").
+- [ ] **Recortar eventos de analytics** para estirar el cupo de Umami
+      (100k eventos/mes gratis; el cupo cuenta eventos, no visitantes).
+      Candidatos a sacar por bajo valor: `step_viewed`, `subject_edited`,
+      `body_edited`, `step_back_clicked`. Mantener los del embudo principal
+      (`country_selected`, `message_generated`, `email_client_opened`,
+      `email_sent_confirmed`, `shared`, `course_clicked`).
+- [ ] **Automatizar la visualización de analytics de /home** (hoy se mira a
+      mano en los dashboards de Cloudflare y Umami).
