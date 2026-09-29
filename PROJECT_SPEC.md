@@ -38,9 +38,31 @@ tráfico viral (potencialmente cientos de miles / millones de usuarios).
   apretó "enviar" en su cliente de mail. Si se quiere trackear, contar clicks en
   el botón "Enviar" (evento de analytics) como proxy, dejando claro que es una
   aproximación.
-- No implementar todavía backend de envío (Resend/AWS SES). Eso es fase 2,
-  fuera de este scope, solo migrar si el proyecto consigue funding
-  (rapid grant de BlueDot u otro) y/o si se necesita tracking real.
+- Se manda **un mail por representante**, cada uno con su propio botón (no un
+  único mail con todos en `to`/`cc`). Así cada representante recibe un mail
+  individual, con su nombre en el saludo.
+
+### Decisión (2026-09-29): descartado que la página envíe los mails
+
+Se evaluó un backend de envío (Resend / AWS SES) para mandar el mail a todos
+los representantes de una vez desde el servidor. **Queda descartado**; se
+sigue usando el proveedor de mail del usuario, un mail por representante.
+
+Motivos:
+- Un servidor no puede mandar *como* el usuario (`juan@gmail.com`): SPF/DKIM/
+  DMARC lo rechazan o lo mandan a spam. El mail saldría de
+  `@noesinevitable.org` con el nombre del ciudadano y `Reply-To`, y los
+  despachos tienden a leer eso como campaña masiva → menos peso por mail.
+- Mandar desde el Gmail del usuario vía OAuth requiere la verificación de
+  Google para scopes restringidos (lenta y cara) y la pantalla de permisos
+  asusta y agrega fricción.
+- Referencia: ControlAI (`act.controlai.org`), con mucho más equipo y
+  presupuesto, hace lo mismo para email — un `mailto:` por destinatario
+  desde el cliente del usuario, con un botón por representante que queda
+  con ✓ al usarlo. Sólo envían desde el servidor donde el email no llega al
+  legislador (formularios web del Congreso de EE.UU., cartas en papel en UK).
+- Para medir envíos reales (no sólo clicks) se va a usar una dirección de
+  tracking en CC (ver `PROJECT_STATUS.md` → Próximos pasos), no un backend.
 
 ## Stack técnico sugerido
 
@@ -147,8 +169,9 @@ proyecto antes de lanzar — el de arriba es un placeholder de estructura.)
 
 ## Fuera de scope para esta fase (no implementar todavía)
 
-- Backend de envío de mails (Resend / AWS SES) — fase 2, solo si hay funding
-  o se necesita tracking real de envíos.
+- Backend de envío de mails (Resend / AWS SES) — **descartado** (ver
+  "Decisión (2026-09-29)" arriba). El tracking real de envíos se hace con
+  una dirección en CC.
 - Base de datos relacional (Postgres/Supabase) — el JSON estático alcanza
   para el volumen de representantes de esta fase.
 - Senadores/diputados **provinciales o locales** — solo nivel nacional.

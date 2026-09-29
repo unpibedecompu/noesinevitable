@@ -46,12 +46,15 @@ verificados.
 ## Flujo del usuario
 
 1. **Paso 1** — elegí país (auto-sugerido por IP vía `/cdn-cgi/trace` de
-   Cloudflare, editable), `provincia/estado`, nombre y (opcional) email →
-   "Generar mi mensaje".
-2. **Paso 2** — elegí a qué representante escribirle, revisá/editá asunto y
-   cuerpo → "Abrir mi cliente de mail" (genera `mailto:` y lo abre).
-   Si el cliente no abre, aparece un fallback para copiar el mensaje.
-3. **Paso 3** — confirmación + botones para compartir (WhatsApp / X / Facebook).
+   Cloudflare, editable), `provincia/estado` y nombre → "Generar mi mensaje".
+2. **Paso 2** — revisá/editá asunto y cuerpo.
+3. **Paso 3** — lista de representantes, un botón por representante
+   ("Enviar con Gmail" / "Enviar con Outlook", o "Abrir formulario"). Cada
+   uno abre un mail individual en el proveedor del usuario; al usarlo, la
+   tarjeta queda con ✓ y atenuada. Si el cliente no abre, hay un fallback
+   para copiar el mensaje.
+4. **Paso 4** — gracias + compartir (WhatsApp / X / Facebook), cursos de
+   BlueDot y redes.
 
 ## Datos de representantes
 
@@ -121,7 +124,11 @@ npm run build
 npx wrangler deploy
 ```
 
-## Fuera de scope (fase 2, no implementar todavía)
+## Fuera de scope
 
-Backend de envío (Resend/SES), base de datos, representantes provinciales/locales,
-login, dashboard de analytics avanzado, Turnstile (agregar sólo si hay abuso de bots).
+- **Backend de envío (Resend/SES): descartado** (2026-09-29). Los mails salen
+  del proveedor del usuario, uno por representante — ver `PROJECT_SPEC.md`.
+- No implementar todavía: base de datos, representantes provinciales/locales,
+  login, dashboard de analytics avanzado, Turnstile (sólo si hay abuso de bots).
+
+Próximos pasos y pendientes: [`PROJECT_STATUS.md`](./PROJECT_STATUS.md).
