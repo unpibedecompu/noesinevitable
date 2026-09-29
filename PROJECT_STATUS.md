@@ -145,10 +145,6 @@
       final de `mailContent` (`data/site-copy.json`): dominio pelado, sin
       `https://` ni parámetros, presentado como aviso ("Le escribo a través
       de…") y no como llamado a clickear, para no parecer phishing.
-- [ ] **Página para representantes (`/fuentes`)** — quién está detrás, las
-      fuentes de lo que dice el mail (declaración del CAIS, Informe
-      Internacional sobre Seguridad de la IA) y el curso de gobernanza de
-      BlueDot. Cuando exista, apuntar la P.D. a `noesinevitable.org/fuentes`.
 - [ ] **Alarma por mail cuando se acerque el tope de eventos de Umami**
       (100k/mes en el plan gratis; ver `strategy/estimated_budget.md`).
       Avisar a `lucasvitali001@gmail.com` al ~70% y ~90% del cupo, para
