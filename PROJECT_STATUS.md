@@ -126,6 +126,13 @@
       (ej. "Estimada Diputada …"), mencionar su cargo / provincia en el
       cuerpo. También ayuda a que los servidores de las cámaras no filtren
       como masivos muchos mails idénticos.
+- [ ] **Alarma por mail cuando se acerque el tope de eventos de Umami**
+      (100k/mes en el plan gratis; ver `strategy/estimated_budget.md`).
+      Avisar a `lucasvitali001@gmail.com` al ~70% y ~90% del cupo, para
+      pasar a Pro antes de perder datos en un pico viral. Primero chequear
+      si Umami Cloud trae alertas de uso propias; si no, un Worker de
+      Cloudflare con cron diario que consulte los eventos del mes por la
+      API de Umami Cloud y mande el mail.
 - [ ] Reactivar más países en `lib/countries.ts` cuando haya datos
       verificados (ver `DATA_TODO.md`).
 
@@ -134,5 +141,11 @@
 - [ ] **Sección "últimas noticias"** — opción de incluir en el mail noticias
       recientes y relevantes sobre riesgos de IA (ControlAI lo ofrece como
       checkbox "Include the latest relevant news in my email").
+- [ ] **Recortar eventos de analytics** para estirar el cupo de Umami
+      (100k eventos/mes gratis; el cupo cuenta eventos, no visitantes).
+      Candidatos a sacar por bajo valor: `step_viewed`, `subject_edited`,
+      `body_edited`, `step_back_clicked`. Mantener los del embudo principal
+      (`country_selected`, `message_generated`, `email_client_opened`,
+      `email_sent_confirmed`, `shared`, `course_clicked`).
 - [ ] **Automatizar la visualización de analytics de /home** (hoy se mira a
       mano en los dashboards de Cloudflare y Umami).
