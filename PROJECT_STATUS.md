@@ -109,9 +109,24 @@
       para contar envíos reales y no sólo clicks:
       - Cloudflare Email Routing en `noesinevitable.org` (ojo: reemplaza los
         MX si el dominio ya recibe mail en otro lado).
-      - Email Worker que lea el `To`, lo matchee contra
-        `representatives.json`, sume un contador por representante/país y
-        descarte el mail (sin guardar contenido ni direcciones).
+      - **Email Worker + base D1.** El Worker lee sólo el header `To` (no
+        parsear el mail entero: el plan free tiene poco CPU por ejecución),
+        lo matchea contra `representatives.json`, suma 1 a un contador en
+        D1 por representante/país y descarta el mail (sin guardar contenido
+        ni direcciones). Ignorar mails cuyo `To` no sea un representante
+        conocido (ej. "responder a todos" de un despacho).
+        - Esquema D1: **un contador por representante** (upsert), no una
+          fila por mail, y sin índices extra — cada índice cuenta como fila
+          escrita y multiplica el consumo del cupo.
+        - Cupos free: 100k ejecuciones de Worker/día y 100k filas escritas
+          en D1/día (≈100k mails/día con el esquema de arriba). Costo $0;
+          Workers Paid ($5/mes) si hace falta más.
+      - **Alarma por mail cerca del límite diario.** El Worker lleva en D1 un
+        contador de ejecuciones del día; al cruzar ~70% y ~90% de las 100k
+        manda un mail a `lucasvitali001@gmail.com` (una sola vez por umbral
+        por día) con el binding `send_email` de Email Routing — los envíos a
+        direcciones de destino verificadas son gratis. Así se puede pasar a
+        Workers Paid antes de que un pico viral deje mails sin contar.
       - Agregar `cc` a los links de `lib/mailto.ts` (Gmail web, Outlook web,
         `mailto:`, deep links mobile — probar en dispositivo real).
       - Explicar el CC en la UI ("para contar cuántos mails se mandan") y en
@@ -126,6 +141,14 @@
       (ej. "Estimada Diputada …"), mencionar su cargo / provincia en el
       cuerpo. También ayuda a que los servidores de las cámaras no filtren
       como masivos muchos mails idénticos.
+- [x] **Link a `noesinevitable.org` en el mail** — agregado como P.D. al
+      final de `mailContent` (`data/site-copy.json`): dominio pelado, sin
+      `https://` ni parámetros, presentado como aviso ("Le escribo a través
+      de…") y no como llamado a clickear, para no parecer phishing.
+- [ ] **Página para representantes (`/fuentes`)** — quién está detrás, las
+      fuentes de lo que dice el mail (declaración del CAIS, Informe
+      Internacional sobre Seguridad de la IA) y el curso de gobernanza de
+      BlueDot. Cuando exista, apuntar la P.D. a `noesinevitable.org/fuentes`.
 - [ ] **Alarma por mail cuando se acerque el tope de eventos de Umami**
       (100k/mes en el plan gratis; ver `strategy/estimated_budget.md`).
       Avisar a `lucasvitali001@gmail.com` al ~70% y ~90% del cupo, para

@@ -33,7 +33,7 @@ export default function HomePage() {
           {siteCopy.pageTitle}
         </p>
         <h1 className="mt-1 text-3xl font-bold leading-tight sm:text-4xl">
-          Sobre este proyecto
+          Sobre esta iniciativa
         </h1>
         <p className="mt-3 text-base text-ink/70">{siteCopy.explanation}</p>
         <p className="mt-3 text-base text-ink/70">
