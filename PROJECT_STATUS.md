@@ -27,18 +27,14 @@
 
 ## Alcance de países
 
-- **Limitado a Argentina solamente** (decisión 2026-09-11, ver
-  `lib/countries.ts`). El resto de los países de la fase 1 original
-  (Bolivia, Brasil, Chile, Colombia, Costa Rica, Ecuador, El Salvador,
-  España, Guatemala, Honduras, México, Nicaragua, Panamá, Paraguay,
-  Rep. Dominicana, Uruguay) está comentado en ese archivo, no borrado —
-  reactivar descomentando cuando haya datos verificados de más países.
-- Como consecuencia, el selector de país en el paso 1 se auto-selecciona
-  (un solo botón, sin necesidad de click) — ver `ContactForm.tsx`.
-- Datos de representantes (`data/representatives.json`) igual tienen AR, CO
-  y MX cargados; el filtro a un solo país pasa por `COUNTRIES`
-  (`lib/countries.ts`), no por los datos. Ver `DATA_TODO.md` para el estado
-  de carga/verificación de representantes por país.
+- **Limitado a Argentina y Uruguay** (decisión 2026-09-30, ver
+  `lib/countries.ts`). El resto de los países de la fase 1 original está
+  comentado en ese archivo, no borrado — reactivar descomentando cuando haya
+  datos verificados de más países.
+- `data/representatives.json` tiene sólo AR y UY: las filas del resto de los
+  países (CO, MX, EC, CR, GT, PA, DO) se borraron el 2026-09-30 y quedan en
+  el historial de git. Ver `DATA_TODO.md` para el estado de carga/verificación
+  de representantes por país.
 
 ## Analytics
 

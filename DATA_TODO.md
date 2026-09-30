@@ -1,17 +1,22 @@
 # Estado de los datos de representantes
 
-`data/representatives.json` — 1455 filas. En producción sólo se sirven las
-`verified: true` (903); las `verified: false` (552: México, Ecuador, Costa Rica
-y diputados de Rep. Dominicana) sólo se ven en `npm run dev`.
+`data/representatives.json` — 448 filas, sólo Argentina y Uruguay, todas
+`verified: true`.
+
+**Recorte a AR + UY (2026-09-30, decisión del dueño):** se borraron del JSON
+todas las filas de otros países (Colombia, México, Ecuador, Costa Rica,
+Guatemala, Panamá y Rep. Dominicana — 1007 filas) y Panamá se sacó del
+selector. Los datos siguen en el historial de git (commit anterior a este
+cambio) si se quieren recuperar. Las filas de esos países se sacaron de la
+tabla de cobertura; las notas de más abajo quedan como referencia de fuentes
+y de lo que faltaba verificar (hoy implicaría volver a cargarlos).
 
 Regla (2026-09-11): **no se cargan** contactos por formulario web (`channel: form`).
 Si un cargo no tiene email publicado, se omite. Las casillas institucionales de
 presidencia (audiencias@, contacto@, transparencia@…) sí se cargan como fila
 `presidente` cuando son el único canal oficial por email.
 
-Países activos en el selector (`lib/countries.ts`): AR, PA, UY. Colombia y
-Guatemala tienen datos verificados pero quedaron desactivados por decisión del
-dueño (2026-09-11).
+Países activos en el selector (`lib/countries.ts`): AR, UY.
 
 **Brasil, descartado (2026-09-11):** se había cargado el roster completo
 (513 diputados + 79 senadores + presidencia, ver fuentes en la tabla de Fase 2
@@ -31,22 +36,8 @@ legis.senado.leg.br) están documentadas en la tabla de Fase 2.
 | 🇦🇷 AR | vicepresidente | 1 | ✅ | senado.gob.ar | `presidencia@senado.gob.ar` (Presidencia del Senado) |
 | 🇦🇷 AR | diputado_nacional | 257 | ✅ | hcdn.gob.ar | **roster completo** (257/257). Email `<slug>@hcdn.gob.ar` leído del `mailto:` de cada ficha oficial |
 | 🇦🇷 AR | senador_nacional | 73 | ✅ | senado.gob.ar | 72 senadores individuales + 1 atención ciudadana. Extraídos del padrón oficial; sólo 3 cross-checeados a mano |
-| 🇨🇴 CO | presidente | 1 | ✅ | presidencia.gov.co | `contacto@presidencia.gov.co` |
-| 🇨🇴 CO | diputado_nacional | 182 | ✅ | camara.gov.co | roster completo Cámara de Representantes 2026-2027. Extraídos del directorio oficial; 5 cross-checeados |
-| 🇨🇴 CO | senador_nacional | 103 | ✅ | app.senado.gov.co API | **roster completo** del Senado 2026-2030 (son 103 bancas, no 108: las 5 de Comunes/FARC expiraron). Emails del API oficial "Datos Abiertos", cross-checeados contra una captura de Wayback |
-| 🇲🇽 MX | senador_nacional | 126 | ❌ | senado.gob.mx open data | de un JSON oficial vía Wayback (jul-2026). **Sitios .gob.mx geo-bloqueados desde acá** |
-| 🇲🇽 MX | diputado_nacional | 36 | ❌ | sitl.diputados.gob.mx | parcial (36 de 500), vía Wayback. Sin email institucional; patrón no reconstruible |
-| 🇪🇨 EC | diputado_nacional | 151 | 6 ✅ / 145 ❌ | asambleanacional.gob.ec/es/pleno-asambleistas | roster completo con provincia, pero **email inferido por patrón** `nombre.apellido@asambleanacional.gob.ec` en 145. El CSV LOTAIP era de la legislatura anterior; el "Distributivo de personal" vigente está roto en el servidor. 16 nacionales + 6 del exterior con `region: null`/circunscripción exterior |
-| 🇩🇴 DO | senador_nacional | 32 | ✅ | senadord.gob.do (Excel oficial) | **roster completo** (32/32). Email de la oficina senatorial por provincia (`<provincia>@senado.gob.do`) |
-| 🇩🇴 DO | diputado_nacional | 188 | ❌ | diputadosrd.gob.do/sil API | 188 de 190, email institucional individual (1 sin correo, eliminada). 12 de circunscripción Nacional/Exterior con `region: null`. "San Juan de la Maguana" normalizado a "San Juan". **Bajado a `false`**: el SIL etiqueta 70 de los 189 con período 2020-2024 aunque los lista "En Curso"; 3 chequeados a mano (Genao Lanza, Doñé Tiburcio, Cedeño) sí son diputados actuales, así que parece metadata vieja de reelectos, pero no se verificó para los 70 |
 | 🇺🇾 UY | diputado_nacional | 91 | ✅ | parlamento.gub.uy/sobreelparlamento/legisladores | 91 de 99 (8 suplentes sin email publicado). Email del `mailto:` oficial, 19 departamentos |
 | 🇺🇾 UY | senador_nacional | 25 | ✅ | parlamento.gub.uy | 25 de 30 (5 sin email publicado). Circunscripción nacional → `region: null` |
-| 🇬🇹 GT | presidente | 1 | ✅ | presidencia.gob.gt | `informacion@secretariaprivada.gob.gt` (Secretaría Privada de la Presidencia) |
-| 🇬🇹 GT | diputado_nacional | 58 | ✅ | congreso.gob.gt | **parcial (58 de 160)**: distrito/bloque del endpoint oficial en vivo, pero el único PDF con emails es de la legislatura 2020-2024 → sólo los reelectos tienen email confirmado. El sitio está detrás de Incapsula/hCaptcha |
-| 🇨🇷 CR | presidente | 1 | ✅ | presidencia.go.cr | `despacho.presidente@presidencia.go.cr` |
-| 🇨🇷 CR | diputado_nacional | 57 | ❌ | asamblea.go.cr (vía Wayback 2026-02-03) | **roster completo** con email individual y provincia, pero de copia cacheada — el sitio en vivo geobloquea. Ojo: el snapshot puede ser de la legislatura saliente (la nueva asumió en mayo 2026) |
-| 🇵🇦 PA | presidente | 1 | ✅ | presidencia.gob.pa | `transparencia@presidencia.gob.pa` — casilla de transparencia, no del despacho |
-| 🇵🇦 PA | diputado_nacional | 70 | ✅ | asamblea.gob.pa/Data/Diputado/List | 70 de 71, email individual y provincia del endpoint JSON oficial. El presidente de la Asamblea (Crispiano Adames) no tiene email publicado → eliminado |
 
 ## Pendiente antes de lanzar
 
