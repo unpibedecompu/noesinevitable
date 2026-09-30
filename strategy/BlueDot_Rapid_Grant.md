@@ -23,7 +23,7 @@ https://www.linkedin.com/in/lucas-vitali-a4b503199/
 
 **Grant type** *(required)* — choose one: Compute & research tools / Events & community / Travel / Something else
 
-Something Else
+Something else
 
 **What are you working on?** *(required, 200 character limit)*
 
@@ -69,13 +69,13 @@ The email closes with a short note that it was sent through noesinevitable.org, 
 
 After sending, the site also points citizens to BlueDot's courses so they can keep learning about AI risks.
 
-During this grant I will focus on Argentina, where I have the most reach, to test whether the site can reach 10,000 emails sent. If it succeeds, I plan to build a team to expand it to every Spanish-speaking country.
+During this grant I will focus on Argentina, where I have the most reach, to test whether the site can get to 10,000 emails sent. If it succeeds, I plan to build a team to expand it to every Spanish-speaking country.
 
 **What have you already done?** *(required)*
 _Describe concrete progress: code written, pilots run, drafts completed, data collected. If you haven't started, explain what you've done to validate the idea._
-The website is live at noesinevitable.org. It currently covers Argentina, Panama and Uruguay, the countries whose representatives publish individual email addresses on official sources: 519 verified contacts in total.
+The website is live at noesinevitable.org. It currently covers Argentina, Panama and Uruguay, the countries whose representatives publish individual email addresses in official sources: 519 verified contacts in total.
 
-I launched it with one Instagram reel and one story (my account has 1,100 followers), and set up analytics (Umami) to measure each step of the funnel. In the first two days, the reel got about 1,500 views and the site had 71 visitors: 41 from Spanish-speaking countries, 31 of them from covered countries. 11 people sent 57 emails: 10 Argentines sent 56 emails to their representatives and 1 Uruguayan sent 1. That is about 35% of visitors from covered countries, each writing to about 5 representatives. 1 visitor also clicked through to a BlueDot course.
+I launched it with one Instagram reel and one story (my account has 1,100 followers), and set up analytics (Umami) to measure each step of the funnel. In the first two days, the reel got about 1,500 views and the site had 71 visitors: 41 from Spanish-speaking countries, 31 of them from covered countries. Eleven people sent 57 emails: 10 Argentines sent 56 emails to their representatives and 1 Uruguayan sent 1. That is about 35% of visitors from covered countries, each writing to about 5 representatives. One visitor also clicked through to a BlueDot course.
 
 I then analyzed the funnel and changed the site based on it: for example, few users returned to the final screen after sending, so I moved the BlueDot course links and share buttons earlier in the flow.
 
@@ -83,7 +83,7 @@ I then analyzed the funnel and changed the site based on it: for example, few us
 **What specifically would this grant fund?** *(required)*
 _List the specific items or services and estimated cost for each._
 _Examples: "$200 Colab Pro+ (2 months), $150 Anthropic API credits for evaluation runs" · "$500 venue hire for 4 monthly meetups, $200 catering" · "$750 conference registration, $600 flights, $400 accommodation." If you are requesting stipend or living expense support, explain what you would be doing and why this role needs funding._
-- $20 Umami Pro analytics (1 month). The free plan caps at 100,000 events a month, about 15,000 visitors at current usage. Reaching 10,000 emails at the current conversion needs about 5,400 visitors, but a single media mention from my outreach could bring far more traffic in a few days.
+- $20 Umami Pro analytics (1 month). The free plan caps at 100,000 events a month, about 15,000 visitors at current usage. Reaching 10,000 emails at the current conversion rate needs about 5,400 visitors, but a single media mention from my outreach could bring far more traffic in a few days.
 - $320 Maintaining and improving the website: 4 hours/week × 4 weeks × $20/hour.
 - $320 Outreach to science communicators, AI safety communicators and mass media (TV, radio, newspapers, streaming): 4 hours/week × 4 weeks × $20/hour.
 - $40 Buffer for unexpected costs (e.g. extra analytics events).
@@ -93,7 +93,7 @@ I currently work on this in my spare time. Funding these hours would let me take
 **How does this reduce catastrophic risk from AI and/or contribute to AI going well for humanity?** *(required)*
 It works through two channels.
 
-First, it shows representatives that their constituents are worried about AI risks. Each email is an individual message from a voter, so AI catastrophic risk becomes harder to dismiss as a niche topic, and representatives have a reason to support governance measures like the three the email asks for. This assumes some representatives will then look into the topic, for example by visiting noesinevitable.org, which is linked in the email and points to BlueDot's courses. Argentina doesn't build frontier AI, but international agreements on AI need support from many countries. Argentina is a test case for the other Spanish-speaking countries.
+First, it shows representatives that their constituents are worried about AI risks. Each email is an individual message from a voter, so catastrophic AI risk becomes harder to dismiss as a niche topic, and representatives have a reason to support governance measures like the three the email asks for. This assumes some representatives will then look into the topic, for example by visiting noesinevitable.org, which is linked in the email and points to BlueDot's courses. Argentina doesn't build frontier AI, but international agreements on AI need support from many countries. Argentina is a test case for the other Spanish-speaking countries.
 
 Second, it shows citizens that AI risk is a widely shared concern, which encourages more of them to act on it. This assumes some of them will go on to learn more, for example through the BlueDot courses linked on the site.
 
