@@ -91,28 +91,23 @@ _Examples: "$200 Colab Pro+ (2 months), $150 Anthropic API credits for evaluatio
 I currently work on this in my spare time. Funding these hours would let me take them from paid work and commit a fixed weekly schedule to the campaign during this month.
 
 **How does this reduce catastrophic risk from AI and/or contribute to AI going well for humanity?** *(required)*
-**Not ready**
+It works through two channels.
 
-On one hand, it will raise awarness on representatives on the current concern society has on AI risks. This will encourage AI catastrophic risks to be treated as a serious topic in politics. As a consequence will encourage governance measures to be apply in order to reduce catastrophic risks.
+First, it shows representatives that their constituents are worried about AI risks. Each email is an individual message from a voter, so AI catastrophic risk becomes harder to dismiss as a niche topic, and representatives have a reason to support governance measures like the three the email asks for. This assumes some representatives will then look into the topic, for example by visiting noesinevitable.org, which is linked in the email and points to BlueDot's courses. Argentina doesn't build frontier AI, but international agreements on AI need support from many countries. Argentina is a test case for the other Spanish-speaking countries.
 
-Here I'm assuming representatives will look for ways for learning about AI catastrophic risks and how to reduce them via governance measures. For example, by going to noesinevitable.org page mentioned on the email, where they will find the BlueDot's courses.
-
-On the other hand, it will show to the society that AI risks are a share concern , which will encourage individuals to take action on reducing catastrophic risks.
-
-Here I'm assuming the individuals will find ways for learning about AI catastrophic risks and how to reduce them. For example, via the BlueDot's courses referenced at the page.
+Second, it shows citizens that AI risk is a widely shared concern, which encourages more of them to act on it. This assumes some of them will go on to learn more, for example through the BlueDot courses linked on the site.
 
 **What would you do without this grant?** *(required)*
 _Would you abandon the project, reduce scope, use slower/free alternatives, or fund it yourself? What would the impact of this be?_
-**Not ready**
 
-I would look for other sources for funding while focusing on other AI safety projects.
+The site would stay live, since hosting is free, but I would stop improving it and doing outreach, and move my spare time to other AI safety projects while looking for other sources of funding.
 
 **What makes you think this project will be successful? Why you? Why now?** *(required)*
-**Not ready**
+Recent AI safety news (the OpenAI incident, Jacob Coxon's post, AI CEOs' apparent willingness to slow down) was covered by every major media outlet. People are now aware that rapid AI development carries big risks they may not want to take. Most want to do something about it, but with low commitment, and filling in a one-minute, low-friction form is exactly that.
 
-The latest news about AI safety (openAI incident, Jacob Coxon tweet, AI CEO's apparent willingness to slow down) where shared massively among the population by every mayor media outlet. Right now people are aware that rapid AI development involves big risks that they may not like to take. Individuals would like to do something about AI risks, but generally with low commitment. Filling a 1 minute low friction form is exactly what they would be willing to do.
+The early data supports this: with one reel on my own account, 11 people sent 57 emails, about 35% of visitors from covered countries. I built and launched the site myself, so I can keep improving it quickly based on what the analytics show.
 
-I also plan to leverage my science communicators and AI safety communicators network, and contact mass media (tv, radio, newspaper, streaming platforms) for making the difusion. I'm assuming they will be open to share this initiative for the same reasons.
+I also plan to use my network of science and AI safety communicators, and to contact mass media (TV, radio, newspapers, streaming platforms) to spread it. I expect them to be open to sharing the initiative for the same reasons.
 
 ---
 
@@ -120,7 +115,7 @@ I also plan to leverage my science communicators and AI safety communicators net
 
 **How could we make this process better, or otherwise help you succeed with your project? Also add any other information you feel we should consider here.**
 
-If this 1-month phase is successful (10.000 emails sent to Argentine representatives), I plan create a working group to add every country spanish-speaking country national representatives and outreach to their communication media.
+It would help a lot to be introduced to science and AI safety communicators in Spanish-speaking countries. Their reach is what will get the site in front of enough people, in Argentina now and in the rest of the Spanish-speaking countries later.
 
 **Can we share your application with other funders and organizations as relevant?** — Yes / No
 _(default: Yes)_
