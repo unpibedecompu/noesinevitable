@@ -73,7 +73,7 @@ During this grant I will focus on Argentina, where I have the most reach, to tes
 
 **What have you already done?** *(required)*
 _Describe concrete progress: code written, pilots run, drafts completed, data collected. If you haven't started, explain what you've done to validate the idea._
-The website is live at noesinevitable.org. It currently covers Argentina, Panama and Uruguay, the countries whose representatives publish individual email addresses in official sources: 519 verified contacts in total.
+The website is live at noesinevitable.org. It currently covers Argentina, Panama and Uruguay, the countries whose representatives publish individual email addresses in official sources.
 
 I launched it with one Instagram reel and one story (my account has 1,100 followers), and set up analytics (Umami) to measure each step of the funnel. In the first two days, the reel got about 1,500 views and the site had 71 visitors: 41 from Spanish-speaking countries, 31 of them from covered countries. Eleven people sent 57 emails: 10 Argentines sent 56 emails to their representatives and 1 Uruguayan sent 1. That is about 35% of visitors from covered countries, each writing to about 5 representatives. One visitor also clicked through to a BlueDot course.
 
@@ -83,7 +83,7 @@ I then analyzed the funnel and changed the site based on it: for example, few us
 **What specifically would this grant fund?** *(required)*
 _List the specific items or services and estimated cost for each._
 _Examples: "$200 Colab Pro+ (2 months), $150 Anthropic API credits for evaluation runs" · "$500 venue hire for 4 monthly meetups, $200 catering" · "$750 conference registration, $600 flights, $400 accommodation." If you are requesting stipend or living expense support, explain what you would be doing and why this role needs funding._
-- $20 Umami Pro analytics (1 month). The free plan caps at 100,000 events a month, about 15,000 visitors at current usage. Reaching 10,000 emails at the current conversion rate needs about 5,400 visitors, but a single media mention from my outreach could bring far more traffic in a few days.
+- $20 Umami Pro analytics (1 month). The free plan caps at 100,000 events a month, about 15,000 visitors at current usage. Reaching 10,000 emails at the current conversion rate needs about 5,400 visitors (1.84 emails per visitor from a covered country), but a single media mention from my outreach could bring far more traffic in a few days.
 - $320 Maintaining and improving the website: 4 hours/week × 4 weeks × $20/hour.
 - $320 Outreach to science communicators, AI safety communicators and mass media (TV, radio, newspapers, streaming): 4 hours/week × 4 weeks × $20/hour.
 - $40 Buffer for unexpected costs (e.g. extra analytics events).
@@ -91,7 +91,6 @@ _Examples: "$200 Colab Pro+ (2 months), $150 Anthropic API credits for evaluatio
 I currently work on this in my spare time. Funding these hours would let me take them from paid work and commit a fixed weekly schedule to the campaign during this month.
 
 **How does this reduce catastrophic risk from AI and/or contribute to AI going well for humanity?** *(required)*
-It works through two channels.
 
 First, it shows representatives that their constituents are worried about AI risks. Each email is an individual message from a voter, so catastrophic AI risk becomes harder to dismiss as a niche topic, and representatives have a reason to support governance measures like the three the email asks for. This assumes some representatives will then look into the topic, for example by visiting noesinevitable.org, which is linked in the email and points to BlueDot's courses. Argentina doesn't build frontier AI, but international agreements on AI need support from many countries. Argentina is a test case for the other Spanish-speaking countries.
 
@@ -103,7 +102,7 @@ _Would you abandon the project, reduce scope, use slower/free alternatives, or f
 The site would stay live, since hosting is free, but I would stop improving it and doing outreach, and move my spare time to other AI safety projects while looking for other sources of funding.
 
 **What makes you think this project will be successful? Why you? Why now?** *(required)*
-Recent AI safety news (the OpenAI incident, Jacob Coxon's post, AI CEOs' apparent willingness to slow down) was covered by every major media outlet. People are now aware that rapid AI development carries big risks they may not want to take. Most want to do something about it, but with low commitment, and filling in a one-minute, low-friction form is exactly that.
+Recent AI safety news (the OpenAI incident, Jacob Coxon's tweet, AI CEOs' apparent willingness to slow down) was covered by every major media outlet. People are now aware that rapid AI development carries big risks they may not want to take. Most want to do something about it, but with low commitment, and filling in a one-minute, low-friction form is exactly that.
 
 The early data supports this: with one reel on my own account, 11 people sent 57 emails, about 35% of visitors from covered countries. I built and launched the site myself, so I can keep improving it quickly based on what the analytics show.
 
