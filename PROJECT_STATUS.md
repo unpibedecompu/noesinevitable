@@ -132,11 +132,21 @@
       ciudad u otro dato que haga el mail más creíble como "constituyente"
       real del representante (ControlAI pide dirección / código postal),
       sin romper el objetivo de completar en 10-20 segundos.
-- [ ] **Mails personalizados por representante.** Hoy el saludo ya lleva el
-      nombre (`Estimado/a {nombre},`). Extender: título y género correctos
-      (ej. "Estimada Diputada …"), mencionar su cargo / provincia en el
-      cuerpo. También ayuda a que los servidores de las cámaras no filtren
-      como masivos muchos mails idénticos.
+- [x] **Mails personalizados por representante** (AR + UY, 2026-09-30).
+      `lib/message-template.ts` arma, al abrir cada mail:
+      - Saludo con título y género: "Estimada Diputada {nombre}:" /
+        "Estimado Senador {nombre}:". Sin dato de género → "Estimado/a
+        Diputado/a". Casillas institucionales (`institutional: true`:
+        Presidencia, Vicepresidencia, Atención Ciudadana) → "De mi mayor
+        consideración:".
+      - Línea de presentación para cargos con región: "Vivo en Córdoba, la
+        provincia que usted representa en el Senado de la Nación." (CABA →
+        "el distrito"). Los senadores de UY (circunscripción nacional) no la
+        llevan.
+      - Género (`gender: "f" | "m"` en `representatives.json`): diputados AR
+        leídos de la ficha oficial de hcdn.gob.ar ("Diputada"/"Diputado");
+        senadores AR y todo UY inferidos por nombre de pila (la inferencia
+        coincidió 256/256 con las fichas de HCDN).
 - [x] **Link a `noesinevitable.org` en el mail** — agregado como P.D. al
       final de `mailContent` (`data/site-copy.json`): dominio pelado, sin
       `https://` ni parámetros, presentado como aviso ("Le escribo a través

@@ -202,7 +202,7 @@ export default function ContactForm({ countries, representatives }: Props) {
 
   function handleForm(rep: Representative) {
     if (!rep.formUrl) return;
-    void writeClipboard(`${subject}\n\n${fullBody(rep.name, body)}`);
+    void writeClipboard(`${subject}\n\n${fullBody(rep, body)}`);
     window.open(rep.formUrl, "_blank", "noopener,noreferrer");
     handleContactOpened(rep, "form");
   }
@@ -211,7 +211,7 @@ export default function ContactForm({ countries, representatives }: Props) {
     const rep = lastSent;
     if (!rep) return;
     trackFunnel("email_didnt_open_clicked", { office: rep.office });
-    const msg = fullBody(rep.name, body);
+    const msg = fullBody(rep, body);
     const text =
       rep.channel === "form"
         ? `${subject}\n\n${msg}`
@@ -431,7 +431,7 @@ export default function ContactForm({ countries, representatives }: Props) {
             const composeParams = {
               to: rep.email,
               subject,
-              body: fullBody(rep.name, body),
+              body: fullBody(rep, body),
             };
             const btnCls =
               "rounded-full bg-accent/10 px-3 py-1.5 text-sm font-semibold text-accent-dark transition hover:bg-accent/20";
