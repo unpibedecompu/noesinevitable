@@ -142,10 +142,12 @@
         Villarruel:" — **actualizar `addressee`/`gender` si cambia el
         titular**. Atención Ciudadana del Senado (sin persona) →
         "Estimados/as:".
-      - Línea de presentación para cargos con región: "Vivo en Córdoba, la
-        provincia que usted representa en el Senado de la Nación." (CABA →
-        "el distrito"). Los senadores de UY (circunscripción nacional) no la
-        llevan.
+      - Provincia/departamento del usuario debajo de la firma ("{nombre}\n
+        Córdoba, Argentina"), placeholder `{{lugar}}` en `mailContent`.
+        Copiado de ControlAI: su plantilla no tiene línea de presentación
+        aparte — dice "I am writing as a constituent" en la primera oración
+        y firma con "[Name] / [Address]". (Se probó antes una línea "Vivo en
+        X, la provincia que usted representa en…" y sonaba forzada.)
       - Género (`gender: "f" | "m"` en `representatives.json`): diputados AR
         leídos de la ficha oficial de hcdn.gob.ar ("Diputada"/"Diputado");
         senadores AR y todo UY inferidos por nombre de pila (la inferencia

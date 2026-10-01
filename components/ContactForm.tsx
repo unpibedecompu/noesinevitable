@@ -159,7 +159,7 @@ export default function ContactForm({ countries, representatives }: Props) {
     e.preventDefault();
     if (!country || !name.trim() || matches.length === 0) return;
     setSubject(SUBJECT);
-    if (!bodyEdited) setBody(buildBody({ userName: name.trim(), countryName: country.name }));
+    if (!bodyEdited) setBody(buildBody({ userName: name.trim(), countryName: country.name, regionName: region }));
     setLastSent(null);
     setStep(2);
     trackFunnel("message_generated", {

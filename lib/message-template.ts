@@ -2,14 +2,13 @@
  * BORRADOR — pendiente de revisión y aprobación del dueño del proyecto antes de lanzar.
  * (ver PROJECT_SPEC.md → "Plantilla de mensaje pre-escrito")
  *
- * El usuario edita el cuerpo (sin saludo) en un textarea. El saludo y la línea
- * de presentación de cada representante se agregan al abrir el mail, así el
- * mismo texto sirve para cualquier destinatario.
+ * El usuario edita el cuerpo (sin saludo) en un textarea. El saludo de cada
+ * representante se agrega al abrir el mail, así el mismo texto sirve para
+ * cualquier destinatario.
  *
  * El texto sale de data/site-copy.json (editable sin tocar código).
  */
 import siteCopy from "@/data/site-copy.json";
-import { getCountry } from "@/lib/countries";
 import type { Gender, Office, Representative } from "@/lib/types";
 
 export const SUBJECT = siteCopy.subject;
@@ -17,13 +16,22 @@ export const SUBJECT = siteCopy.subject;
 export interface BodyContext {
   userName: string;
   countryName: string;
+  /** Provincia / departamento elegido en el paso 1 (`null` si el país no tiene). */
+  regionName: string | null;
 }
 
-/** Cuerpo del mensaje, sin el saludo (el usuario ve y edita esto). */
+/**
+ * Cuerpo del mensaje, sin el saludo (el usuario ve y edita esto).
+ * `{{lugar}}` va debajo de la firma ("Córdoba, Argentina"), como la dirección
+ * en la plantilla de ControlAI: es lo que identifica al remitente como
+ * representado/a del destinatario.
+ */
 export function buildBody(ctx: BodyContext): string {
   const name = ctx.userName || "[tu nombre]";
+  const place = ctx.regionName ? `${ctx.regionName}, ${ctx.countryName}` : ctx.countryName;
   return siteCopy.mailContent
     .replaceAll("{{nombre}}", name)
+    .replaceAll("{{lugar}}", place)
     .replaceAll("{{pais}}", ctx.countryName);
 }
 
@@ -54,45 +62,7 @@ export function salutationFor(rep: Representative): string {
   return `${estimado} ${pick(rep.gender, TITLES[rep.office])} ${name}:`;
 }
 
-/** Cámara de cada cargo legislativo, por país. Sin entrada → no hay línea de presentación. */
-const CHAMBERS: Record<string, Partial<Record<Office, string>>> = {
-  AR: {
-    diputado_nacional: "la Cámara de Diputados de la Nación",
-    senador_nacional: "el Senado de la Nación",
-  },
-  UY: {
-    diputado_nacional: "la Cámara de Representantes",
-    senador_nacional: "la Cámara de Senadores",
-  },
-};
-
-/** Artículo de cada etiqueta de región (`CountryConfig.regionLabel`). */
-const REGION_ARTICLE: Record<string, string> = {
-  Provincia: "la",
-  Departamento: "el",
-};
-
-/**
- * Línea que ubica al remitente como representado/a del destinatario, ej:
- * "Vivo en Córdoba, la provincia que usted representa en el Senado de la Nación."
- * Sólo para cargos con región (el usuario eligió esa misma región en el paso 1).
- * `null` si no aplica (cargos nacionales, instituciones, países sin datos).
- */
-export function introFor(rep: Representative): string | null {
-  const chamber = CHAMBERS[rep.country]?.[rep.office];
-  if (rep.institutional || !rep.region || !chamber) return null;
-  // CABA no es provincia: "la Ciudad Autónoma de Buenos Aires, el distrito…".
-  if (rep.region === "Ciudad Autónoma de Buenos Aires") {
-    return `Vivo en la ${rep.region}, el distrito que usted representa en ${chamber}.`;
-  }
-  const label = getCountry(rep.country)?.regionLabel;
-  const article = label && REGION_ARTICLE[label];
-  const where = article ? `, ${article} ${label!.toLowerCase()} que usted representa` : ", que usted representa";
-  return `Vivo en ${rep.region}${where} en ${chamber}.`;
-}
-
-/** Cuerpo final que va al mail / formulario, con saludo y presentación del destinatario. */
+/** Cuerpo final que va al mail / formulario, ya con el saludo del destinatario. */
 export function fullBody(rep: Representative, body: string): string {
-  const intro = introFor(rep);
-  return [salutationFor(rep), intro, body].filter(Boolean).join("\n\n");
+  return `${salutationFor(rep)}\n\n${body}`;
 }
