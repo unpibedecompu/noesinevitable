@@ -18,21 +18,41 @@ export interface BodyContext {
   countryName: string;
   /** Provincia / departamento elegido en el paso 1 (`null` si el país no tiene). */
   regionName: string | null;
+  /** `CountryConfig.regionLabel` del país ("Provincia", "Departamento"…). */
+  regionLabel: string;
 }
 
 /**
+ * "de la provincia de La Pampa, Argentina" / "del departamento de Rivera,
+ * Uruguay" / "de la Ciudad de Buenos Aires, Argentina". Sin región o con una
+ * etiqueta sin artículo cargado: "de {región}, {país}".
+ */
+function placeFor(ctx: BodyContext): string {
+  const { regionName: region, regionLabel: label, countryName: country } = ctx;
+  if (!region) return `de ${country}`;
+  if (region === "Ciudad Autónoma de Buenos Aires") return `de la Ciudad de Buenos Aires, ${country}`;
+  const prefix = REGION_PREFIX[label];
+  return `${prefix ? `${prefix} ` : "de "}${region}, ${country}`;
+}
+
+/** Cómo se nombra cada tipo de región en la oración, por `regionLabel`. */
+const REGION_PREFIX: Record<string, string> = {
+  Provincia: "de la provincia de",
+  Departamento: "del departamento de",
+};
+
+/**
  * Cuerpo del mensaje, sin el saludo (el usuario ve y edita esto).
- * `{{lugar}}` ("Córdoba, Argentina") va en la primera oración ("le escribo
- * como ciudadano/a de Córdoba, Argentina"): es lo que identifica al
- * remitente como representado/a del destinatario, como el "I am writing as a
- * constituent" de la plantilla de ControlAI.
+ * `{{lugar}}` va en la primera oración ("le escribo como ciudadano/a de la
+ * provincia de Córdoba, Argentina"): es lo que identifica al remitente como
+ * representado/a del destinatario, como el "I am writing as a constituent"
+ * de la plantilla de ControlAI. Incluye la preposición ("de la…", "del…").
  */
 export function buildBody(ctx: BodyContext): string {
   const name = ctx.userName || "[tu nombre]";
-  const place = ctx.regionName ? `${ctx.regionName}, ${ctx.countryName}` : ctx.countryName;
   return siteCopy.mailContent
     .replaceAll("{{nombre}}", name)
-    .replaceAll("{{lugar}}", place)
+    .replaceAll("{{lugar}}", placeFor(ctx))
     .replaceAll("{{pais}}", ctx.countryName);
 }
 

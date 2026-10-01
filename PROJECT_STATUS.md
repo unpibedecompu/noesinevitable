@@ -143,8 +143,11 @@
         titular**. Atención Ciudadana del Senado (sin persona) →
         "Estimados/as:".
       - Provincia/departamento del usuario en la primera oración: "le
-        escribo como ciudadano/a de Córdoba, Argentina" (placeholder
-        `{{lugar}}` en `mailContent`). Inspirado en ControlAI, cuya
+        escribo como ciudadano/a de la provincia de La Pampa, Argentina" /
+        "del departamento de Rivera, Uruguay" / "de la Ciudad de Buenos
+        Aires, Argentina" (placeholder `{{lugar}}` en `mailContent`, armado
+        en `placeFor` según `regionLabel`; si se suma un país con otra
+        etiqueta, agregarla a `REGION_PREFIX`). Inspirado en ControlAI, cuya
         plantilla no tiene línea de presentación aparte — dice "I am
         writing as a constituent" en la primera oración. (Se probó antes una
         línea "Vivo en X, la provincia que usted representa en…" y sonaba
