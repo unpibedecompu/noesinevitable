@@ -22,9 +22,10 @@ export interface BodyContext {
 
 /**
  * Cuerpo del mensaje, sin el saludo (el usuario ve y edita esto).
- * `{{lugar}}` va debajo de la firma ("Córdoba, Argentina"), como la dirección
- * en la plantilla de ControlAI: es lo que identifica al remitente como
- * representado/a del destinatario.
+ * `{{lugar}}` ("Córdoba, Argentina") va en la primera oración ("le escribo
+ * como ciudadano/a de Córdoba, Argentina"): es lo que identifica al
+ * remitente como representado/a del destinatario, como el "I am writing as a
+ * constituent" de la plantilla de ControlAI.
  */
 export function buildBody(ctx: BodyContext): string {
   const name = ctx.userName || "[tu nombre]";
