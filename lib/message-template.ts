@@ -42,14 +42,16 @@ const pick = <T>(g: Gender | undefined, [f, m, x]: [T, T, T]) =>
   g === "f" ? f : g === "m" ? m : x;
 
 /**
- * Saludo del mail. Personas: "Estimada Diputada Nombre Apellido:" (con "/a" si
- * no hay dato de género). Casillas institucionales (Presidencia, Atención
- * Ciudadana…): fórmula formal sin nombre.
+ * Saludo del mail: "Estimada Diputada Nombre Apellido:" (con "/a" si no hay
+ * dato de género). Casillas institucionales: mismo saludo con el titular del
+ * cargo (`addressee`), o "Estimados/as:" si no hay una persona detrás
+ * (ej. Atención Ciudadana del Senado).
  */
 export function salutationFor(rep: Representative): string {
-  if (rep.institutional) return "De mi mayor consideración:";
+  const name = rep.institutional ? rep.addressee : rep.name;
+  if (!name) return "Estimados/as:";
   const estimado = pick(rep.gender, ["Estimada", "Estimado", "Estimado/a"]);
-  return `${estimado} ${pick(rep.gender, TITLES[rep.office])} ${rep.name}:`;
+  return `${estimado} ${pick(rep.gender, TITLES[rep.office])} ${name}:`;
 }
 
 /** Cámara de cada cargo legislativo, por país. Sin entrada → no hay línea de presentación. */

@@ -63,8 +63,9 @@ data.forEach((r, i) => {
   if (typeof r.verified !== "boolean") errors.push(`${at}: falta el flag booleano "verified"`);
   if (r.gender !== undefined && r.gender !== "f" && r.gender !== "m") errors.push(`${at}: gender "${r.gender}" inválido (f | m)`);
   if (r.institutional !== undefined && r.institutional !== true) errors.push(`${at}: institutional debe ser true u omitirse`);
-  if (r.institutional && r.gender) warnings.push(`${at}: casilla institucional con gender (se ignora)`);
-  if (!r.institutional && !r.gender) warnings.push(`${at}: sin gender → saludo neutro "Estimado/a"`);
+  if (r.addressee !== undefined && (!r.institutional || typeof r.addressee !== "string" || !r.addressee.trim())) errors.push(`${at}: addressee sólo va en casillas institucionales, como string no vacío`);
+  if (r.institutional && !r.addressee && r.gender) warnings.push(`${at}: casilla institucional sin addressee con gender (se ignora)`);
+  if ((!r.institutional || r.addressee) && !r.gender) warnings.push(`${at}: sin gender → saludo neutro "Estimado/a"`);
 
   if (r.office === "senador_nacional" && UNICAMERAL.has(r.country)) {
     errors.push(`${at}: ${r.country} es unicameral, no tiene senador_nacional`);

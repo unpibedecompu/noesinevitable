@@ -26,10 +26,16 @@ export interface Representative {
   office: Office;
   name: string;
   /**
-   * Casilla institucional (Presidencia, Atención Ciudadana…), no una persona:
-   * el saludo es "De mi mayor consideración:" en vez de "Estimado/a {nombre}".
+   * Casilla institucional (Presidencia, Atención Ciudadana…), no una persona.
+   * `name` es el de la institución (lo que se ve en la UI); el saludo usa
+   * `addressee` si está, o "Estimados/as:" si no.
    */
   institutional?: boolean;
+  /**
+   * Titular actual del cargo de una casilla institucional, para el saludo
+   * ("Estimado Presidente Javier Milei:"). Actualizar si cambia el titular.
+   */
+  addressee?: string;
   /** Género, para el saludo. Si falta en una persona, se usa "Estimado/a Diputado/a". */
   gender?: Gender;
   /** Canal de contacto. Si falta, se asume "email". */

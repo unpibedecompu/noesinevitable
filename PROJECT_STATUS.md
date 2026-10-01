@@ -136,9 +136,12 @@
       `lib/message-template.ts` arma, al abrir cada mail:
       - Saludo con título y género: "Estimada Diputada {nombre}:" /
         "Estimado Senador {nombre}:". Sin dato de género → "Estimado/a
-        Diputado/a". Casillas institucionales (`institutional: true`:
-        Presidencia, Vicepresidencia, Atención Ciudadana) → "De mi mayor
-        consideración:".
+        Diputado/a". Casillas institucionales (`institutional: true`):
+        mismo saludo con el titular actual (`addressee`): "Estimado
+        Presidente Javier Milei:", "Estimada Vicepresidenta Victoria
+        Villarruel:" — **actualizar `addressee`/`gender` si cambia el
+        titular**. Atención Ciudadana del Senado (sin persona) →
+        "Estimados/as:".
       - Línea de presentación para cargos con región: "Vivo en Córdoba, la
         provincia que usted representa en el Senado de la Nación." (CABA →
         "el distrito"). Los senadores de UY (circunscripción nacional) no la
