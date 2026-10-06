@@ -8,7 +8,8 @@
     "build": "next build",
     "preview": "next build && npx --yes serve out -l 4173",
     "lint": "next lint",
-    "check:data": "node scripts/validate-representatives.mjs"
+    "check:data": "node scripts/validate-representatives.mjs",
+    "edit:mail": "node scripts/editar-mail.mjs"
   },
   "dependencies": {
     "next": "15.5.25",
