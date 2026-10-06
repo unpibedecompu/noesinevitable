@@ -11,8 +11,7 @@
     {
       "binding": "DB",
       "database_name": "noesinevitable-cc-counter",
-      // Completar con el ID que imprime `npx wrangler d1 create`.
-      "database_id": "REEMPLAZAR_CON_EL_ID_DE_D1"
+      "database_id": "44e43f23-b959-47f5-b29d-d684a0fc2389"
     }
   ],
   "send_email": [
