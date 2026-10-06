@@ -34,6 +34,8 @@ const NATIONAL_COLOR = "#52514e";
 const UNSPECIFIED_COLOR = "#a3a29c";
 const OTHER_COLOR = "#898781";
 
+const fmt = (n: number) => n.toLocaleString("es-AR");
+
 const regionName = (region: string | null) =>
   region === NATIONAL ? "Cargos nacionales" : region ?? "Sin especificar";
 
@@ -46,9 +48,9 @@ interface Row {
 }
 
 /**
- * Participación: dos donuts (personas y mails enviados) con una leyenda
- * debajo. Elegir un país en los filtros de arriba muestra sus provincias/
- * departamentos, cada uno con su color. Arranca con la base de antes del
+ * Participación: dos donuts (personas y mails enviados) y una tabla debajo
+ * con una fila de total y una por país. Elegir un país en los filtros de
+ * arriba muestra sus provincias/departamentos, cada uno con su color. Arranca con la base de antes del
  * conteo automático, atenuada, y se actualiza con los totales en vivo.
  */
 export default function ParticipationDonuts({
@@ -153,24 +155,43 @@ export default function ParticipationDonuts({
         </figure>
       </div>
 
-      {/* Leyenda: el color solo no alcanza para saber qué es cada porción. */}
-      <ul className="mt-5 flex flex-wrap justify-center gap-x-4 gap-y-1.5 text-xs text-ink/70">
-        {rows.map((r) => (
-          <li key={r.key} className="flex items-center gap-1.5">
-            <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: r.color }} aria-hidden="true" />
-            {r.name}
-          </li>
-        ))}
-      </ul>
+      <table className="mt-6 w-full text-sm">
+        <thead>
+          <tr className="border-b border-ink/10 text-left text-xs uppercase tracking-wide text-ink/50">
+            <th className="py-2 font-semibold">{country ? country.regionLabel : "País"}</th>
+            <th className="py-2 text-right font-semibold">Personas</th>
+            <th className="py-2 text-right font-semibold">Mails</th>
+          </tr>
+        </thead>
+        <tbody className="tabular-nums">
+          <tr className="border-b border-ink/10 font-semibold">
+            <td className="py-2">{country ? `Total ${country.name}` : "Total"}</td>
+            <td className="py-2 text-right">{fmt(totalPeople)}</td>
+            <td className="py-2 text-right">{fmt(totalMails)}</td>
+          </tr>
+          {rows.map((r) => (
+            <tr key={r.key} className="border-b border-ink/5 last:border-0">
+              <td className="py-2">
+                <span className="flex items-center gap-2">
+                  <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: r.color }} aria-hidden="true" />
+                  <span className="text-ink/80">{r.name}</span>
+                </span>
+              </td>
+              <td className="py-2 text-right text-ink/80">{fmt(r.people)}</td>
+              <td className="py-2 text-right text-ink/80">{fmt(r.mails)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
 
       {country && (
-        <p className="mt-4 text-center text-xs text-ink/50">
+        <p className="mt-3 text-xs text-ink/50">
           Las personas se cuentan por la {country.regionLabel.toLowerCase()} que eligieron; los
           mails, por la del representante que los recibió.
         </p>
       )}
 
-      <p className="mt-2 text-center text-xs text-ink/40">Se actualiza cada 15 minutos.</p>
+      <p className="mt-2 text-xs text-ink/40">Se actualiza cada 15 minutos.</p>
     </div>
   );
 }
