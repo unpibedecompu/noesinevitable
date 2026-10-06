@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { CountryConfig, Representative } from "@/lib/types";
+import type { CountryConfig, Gender, Representative } from "@/lib/types";
 import { OFFICE_LABELS, COUNTRY_CODES } from "@/lib/countries";
 import { SUBJECT, buildBody, fullBody } from "@/lib/message-template";
 import {
@@ -32,6 +32,14 @@ const OFFICE_ORDER: Record<string, number> = {
 
 const REPO_URL =
   "https://github.com/fourofclubs001/unpibedecompu/tree/master/strategy/contacta_representante_latam";
+
+/** Sexo del remitente (obligatorio): "Otro" deja "ciudadano/a" en el mail. */
+type SenderGender = Gender | "otro";
+const GENDER_OPTIONS: [SenderGender, string][] = [
+  ["f", "Femenino"],
+  ["m", "Masculino"],
+  ["otro", "Otro"],
+];
 
 const CHIP_CLS =
   "rounded-full bg-accent px-3 py-1.5 text-sm font-semibold text-ink transition hover:bg-accent-dark";
@@ -87,6 +95,7 @@ export default function ContactForm({ countries, representatives }: Props) {
   );
   const [region, setRegion] = useState<string | null>(null);
   const [name, setName] = useState("");
+  const [gender, setGender] = useState<SenderGender | null>(null);
 
   const [subject, setSubject] = useState(SUBJECT);
   const [body, setBody] = useState("");
@@ -158,9 +167,9 @@ export default function ContactForm({ countries, representatives }: Props) {
 
   function handleGenerate(e: React.FormEvent) {
     e.preventDefault();
-    if (!country || !name.trim() || matches.length === 0) return;
+    if (!country || !name.trim() || !gender || matches.length === 0) return;
     setSubject(SUBJECT);
-    if (!bodyEdited) setBody(buildBody({ userName: name.trim(), countryName: country.name, regionName: region, regionLabel: country.regionLabel }));
+    if (!bodyEdited) setBody(buildBody({ userName: name.trim(), userGender: gender === "otro" ? null : gender, countryName: country.name, regionName: region, regionLabel: country.regionLabel }));
     setLastSent(null);
     setStep(2);
     trackFunnel("message_generated", {
@@ -302,6 +311,30 @@ export default function ContactForm({ countries, representatives }: Props) {
           />
         </div>
 
+        <div className="mt-5">
+          <span className="mb-2 block text-sm font-semibold">
+            Sexo
+          </span>
+          {/* Sólo cambia "ciudadano/a" en el mail; no se manda a analytics. */}
+          <div className="flex flex-wrap gap-2">
+            {GENDER_OPTIONS.map(([value, label]) => (
+              <button
+                key={value}
+                type="button"
+                aria-pressed={gender === value}
+                onClick={() => setGender(gender === value ? null : value)}
+                className={`rounded-full px-3 py-1.5 text-sm transition ${
+                  gender === value
+                    ? "bg-accent font-semibold text-ink"
+                    : "bg-ink/5 text-ink/70 hover:bg-ink/10"
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
+
         {country && matches.length === 0 && (
           <p className="mt-4 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-900">
             Todavía no cargamos representantes para esta selección.
@@ -310,7 +343,7 @@ export default function ContactForm({ countries, representatives }: Props) {
 
         <button
           type="submit"
-          disabled={!country || !name.trim() || matches.length === 0}
+          disabled={!country || !name.trim() || !gender || matches.length === 0}
           className="mt-6 w-full rounded-full bg-accent px-4 py-3 font-semibold text-ink transition hover:bg-accent-dark disabled:cursor-not-allowed disabled:opacity-40"
         >
           Generar mi mensaje
