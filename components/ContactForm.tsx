@@ -13,6 +13,7 @@ import {
   buildShareX,
   buildShareFacebook,
   buildShareWhatsApp,
+  TRACKING_CC,
 } from "@/lib/mailto";
 import { trackFunnel } from "@/lib/analytics";
 import { SHARE_URL, SHARE_TEXT } from "@/lib/share";
@@ -430,6 +431,7 @@ export default function ContactForm({ countries, representatives }: Props) {
           {matches.map((rep) => {
             const composeParams = {
               to: rep.email,
+              cc: TRACKING_CC,
               subject,
               body: fullBody(rep, body),
             };
@@ -517,6 +519,13 @@ export default function ContactForm({ countries, representatives }: Props) {
             );
           })}
         </ul>
+
+        {TRACKING_CC && (
+          <p className="mt-2 text-xs text-ink/50">
+            El mail va con copia a {TRACKING_CC} sólo para contar cuántos se
+            mandan. No guardamos tu mail ni tus datos, sólo el número.
+          </p>
+        )}
 
         {!lastSent?.verified && lastSent && (
           <p className="mt-2 text-xs text-amber-700">

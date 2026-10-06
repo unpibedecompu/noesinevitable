@@ -101,32 +101,38 @@
 
 ## Próximos pasos
 
-- [ ] **Dirección de tracking en CC** (ej. `registro@noesinevitable.org`)
-      para contar envíos reales y no sólo clicks:
-      - Cloudflare Email Routing en `noesinevitable.org` (ojo: reemplaza los
-        MX si el dominio ya recibe mail en otro lado).
-      - **Email Worker + base D1.** El Worker lee sólo el header `To` (no
-        parsear el mail entero: el plan free tiene poco CPU por ejecución),
-        lo matchea contra `representatives.json`, suma 1 a un contador en
-        D1 por representante/país y descarta el mail (sin guardar contenido
-        ni direcciones). Ignorar mails cuyo `To` no sea un representante
-        conocido (ej. "responder a todos" de un despacho).
-        - Esquema D1: **un contador por representante** (upsert), no una
-          fila por mail, y sin índices extra — cada índice cuenta como fila
-          escrita y multiplica el consumo del cupo.
-        - Cupos free: 100k ejecuciones de Worker/día y 100k filas escritas
-          en D1/día (≈100k mails/día con el esquema de arriba). Costo $0;
-          Workers Paid ($5/mes) si hace falta más.
-      - **Alarma por mail cerca del límite diario.** El Worker lleva en D1 un
-        contador de ejecuciones del día; al cruzar ~70% y ~90% de las 100k
-        manda un mail a `lucasvitali001@gmail.com` (una sola vez por umbral
-        por día) con el binding `send_email` de Email Routing — los envíos a
-        direcciones de destino verificadas son gratis. Así se puede pasar a
-        Workers Paid antes de que un pico viral deje mails sin contar.
-      - Agregar `cc` a los links de `lib/mailto.ts` (Gmail web, Outlook web,
-        `mailto:`, deep links mobile — probar en dispositivo real).
-      - Explicar el CC en la UI ("para contar cuántos mails se mandan") y en
-        la política de privacidad.
+- [ ] **Dirección de tracking en CC** (`registro@noesinevitable.org`) para
+      contar envíos reales y no sólo clicks. **Código hecho (2026-10-06,
+      rama `feature/cc-tracking`); falta el setup en Cloudflare** — pasos en
+      `workers/cc-counter/README.md`.
+      - Hecho: Email Worker `workers/cc-counter/` (separado del sitio; el
+        `wrangler.jsonc` de la raíz no se tocó). Lee sólo el header `To`, lo
+        matchea contra `representatives.json`, suma 1 en D1 por
+        representante y descarta el mail sin guardar contenido ni
+        direcciones. Ignora mails cuyo `To` no sea un representante conocido
+        y los que *manda* un representante ("responder a todos" de un
+        despacho). Probado en local con `wrangler dev`.
+      - Hecho: esquema D1 con un contador por representante (upsert) + una
+        fila por día con las ejecuciones, sin índices extra. Son **2 filas
+        escritas por mail** → con el cupo free de D1 (100k filas/día) el
+        techo es **~50k mails/día** (no 100k). Costo $0; Workers Paid
+        ($5/mes) si hace falta más.
+      - Hecho: alarma por mail a `lucasvitali001@gmail.com` al cruzar 70% y
+        90% de `DAILY_LIMIT` (50000 por default, en `vars`), una sola vez
+        por umbral por día, con el binding `send_email`.
+      - Hecho: `cc` en todos los links de `lib/mailto.ts` (Gmail web,
+        Outlook web, `mailto:`, deep links iOS/Android) vía `TRACKING_CC`, y
+        una línea en el paso 3 explicando la copia. **Falta probar los deep
+        links mobile en dispositivo real.**
+      - **Orden de deploy:** primero el setup de Cloudflare y la prueba del
+        README, después mergear la rama. Si el sitio sale con el CC antes,
+        cada copia rebota y el usuario recibe un error de entrega
+        (`TRACKING_CC = ""` lo desactiva).
+      - Riesgo aceptado: cualquiera puede inflar el conteo mandando mails a
+        `registro@` con un representante en `To`. Los números son
+        orientativos, no auditables.
+      - Pendiente: no hay política de privacidad en el sitio; cuando se
+        escriba, mencionar el CC.
 - [ ] **Revisar los datos que se le piden al usuario** para el mail. Hoy es
       sólo nombre (+ provincia para filtrar). Evaluar pedir código postal,
       ciudad u otro dato que haga el mail más creíble como "constituyente"

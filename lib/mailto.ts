@@ -2,9 +2,26 @@ export type MailProvider = "gmail" | "outlook" | "mailto";
 
 export interface ComposeParams {
   to: string;
+  /** Copia (opcional). Se usa para la dirección de tracking (`TRACKING_CC`). */
+  cc?: string;
   subject: string;
   body: string;
 }
+
+/**
+ * Dirección que va en CC de cada mail para contar envíos reales (la recibe el
+ * Worker de `workers/cc-counter/`, que sólo suma 1 por representante y
+ * descarta el mail). Poner "" para desactivarla.
+ *
+ * ⚠ No deployar con esta dirección antes de que el Worker y el Email Routing
+ * de noesinevitable.org estén andando: si no, cada CC rebota y el usuario
+ * recibe un aviso de error de entrega.
+ */
+export const TRACKING_CC = "registro@noesinevitable.org";
+
+/** `{ cc }` si hay CC, `{}` si no — para no mandar un `cc=` vacío. */
+const ccParam = (cc: string | undefined): Record<string, string> =>
+  cc ? { cc } : {};
 
 /** URLSearchParams usa "+" para los espacios; muchos clientes lo toman literal. */
 const qs = (params: Record<string, string>) =>
@@ -16,6 +33,7 @@ const qs = (params: Record<string, string>) =>
  */
 export function buildMailto(params: ComposeParams): string {
   return `mailto:${encodeURIComponent(params.to)}?${qs({
+    ...ccParam(params.cc),
     subject: params.subject,
     body: params.body,
   })}`;
@@ -27,6 +45,7 @@ export function buildGmailCompose(params: ComposeParams): string {
     view: "cm",
     fs: "1",
     to: params.to,
+    ...ccParam(params.cc),
     su: params.subject,
     body: params.body,
   })}`;
@@ -36,6 +55,7 @@ export function buildGmailCompose(params: ComposeParams): string {
 export function buildOutlookCompose(params: ComposeParams): string {
   return `https://outlook.office.com/mail/deeplink/compose?${qs({
     to: params.to,
+    ...ccParam(params.cc),
     subject: params.subject,
     body: params.body,
   })}`;
@@ -51,6 +71,7 @@ export function buildOutlookCompose(params: ComposeParams): string {
 export function buildGmailAppCompose(params: ComposeParams): string {
   return `googlegmail:///co?${qs({
     to: params.to,
+    ...ccParam(params.cc),
     subject: params.subject,
     body: params.body,
   })}`;
@@ -70,6 +91,7 @@ export function buildGmailAppCompose(params: ComposeParams): string {
  */
 export function buildGmailAppComposeAndroid(params: ComposeParams): string {
   const ssp = `${encodeURIComponent(params.to)}?${qs({
+    ...ccParam(params.cc),
     subject: params.subject,
     body: params.body,
   })}`;
@@ -84,6 +106,7 @@ export function buildGmailAppComposeAndroid(params: ComposeParams): string {
 export function buildOutlookAppCompose(params: ComposeParams): string {
   return `ms-outlook://compose?${qs({
     to: params.to,
+    ...ccParam(params.cc),
     subject: params.subject,
     body: params.body,
   })}`;

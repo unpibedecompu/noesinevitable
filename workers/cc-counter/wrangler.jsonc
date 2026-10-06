@@ -1,0 +1,32 @@
+{
+  // Worker de Email Routing que cuenta los mails con CC a
+  // registro@noesinevitable.org. Independiente del sitio (el wrangler.jsonc de
+  // la raíz es sólo static assets y se deploya solo desde Git). Este se
+  // deploya a mano: ver README.md.
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "noesinevitable-cc-counter",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-09-11",
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "noesinevitable-cc-counter",
+      // Completar con el ID que imprime `npx wrangler d1 create`.
+      "database_id": "REEMPLAZAR_CON_EL_ID_DE_D1"
+    }
+  ],
+  "send_email": [
+    {
+      "name": "ALERT",
+      // Tiene que ser una dirección de destino verificada en Email Routing.
+      "destination_address": "lucasvitali001@gmail.com"
+    }
+  ],
+  "vars": {
+    // 2 filas escritas en D1 por mail (contador + ejecuciones del día) →
+    // con el cupo free de 100k filas/día, el techo es ~50k mails/día.
+    "DAILY_LIMIT": "50000",
+    "ALERT_FROM": "alertas@noesinevitable.org",
+    "ALERT_TO": "lucasvitali001@gmail.com"
+  }
+}
