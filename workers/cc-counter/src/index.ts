@@ -9,8 +9,9 @@
  *      del día en D1 — una sola fila escrita por mail,
  *   3. descarta el mail — no se guarda contenido ni direcciones del remitente.
  *
- * Personas: el sitio hace `POST /people` (sólo el código de país) la primera
- * vez que alguien aprieta "Enviar" en ese navegador; se suma 1 por país y día.
+ * Personas: el sitio hace `POST /people` (sólo país y provincia/departamento)
+ * la primera vez que alguien aprieta "Enviar" en ese navegador; se suma 1 por
+ * país, región y día.
  *
  * Totales públicos: el cron de 15 minutos guarda mails y personas por país en
  * una sola fila de D1, y `GET /stats` devuelve esa fila (la usa /home del
@@ -49,12 +50,28 @@ interface Env {
 const UMAMI_CRON = "0 11 * * *";
 const UMAMI_API = "https://api.umami.is/v1";
 
-/** email (minúsculas) → país, de `data/representatives.json`. */
-const REPS = new Map<string, string>(
-  (representatives as { email: string; country: string }[])
+type Rep = { country: string; region: string | null };
+
+/** email (minúsculas) → país y provincia/departamento, de `data/representatives.json`. */
+const REPS = new Map<string, Rep>(
+  (representatives as ({ email: string } & Rep)[])
     .filter((r) => r.email)
-    .map((r) => [r.email.trim().toLowerCase(), r.country]),
+    .map((r) => [r.email.trim().toLowerCase(), { country: r.country, region: r.region }]),
 );
+
+/** País → provincias/departamentos con representantes cargados. */
+const REGIONS = new Map<string, Set<string>>();
+for (const { country, region } of REPS.values()) {
+  if (!REGIONS.has(country)) REGIONS.set(country, new Set());
+  if (region) REGIONS.get(country)!.add(region);
+}
+
+/**
+ * Región de los mails a cargos de alcance nacional (Presidencia, senadores
+ * de UY…) en los totales públicos; el sitio la muestra como "Cargos
+ * nacionales". `null` es "sin especificar".
+ */
+const NATIONAL = "_nacional";
 
 const THRESHOLDS = [
   { pct: 70, bit: 1 },
@@ -88,7 +105,7 @@ export default {
         `INSERT INTO counts (day, email, country, sent) VALUES (?1, ?2, ?3, 1)
          ON CONFLICT(day, email) DO UPDATE SET sent = sent + 1`,
       )
-        .bind(today(), rep, REPS.get(rep))
+        .bind(today(), rep, REPS.get(rep)!.country)
         .run();
     }
     // Sin forward ni reject: Email Routing descarta el mail.
@@ -103,9 +120,10 @@ export default {
   },
 
   /**
-   * `GET /stats`: totales públicos de mails y personas por país (nada
-   * personal). `POST /people`: el sitio avisa, una sola vez por navegador,
-   * que alguien apretó "Enviar"; el cuerpo es sólo el código de país.
+   * `GET /stats`: totales públicos de mails y personas por país y región
+   * (nada personal). `POST /people`: el sitio avisa, una sola vez por
+   * navegador, que alguien apretó "Enviar"; el cuerpo es sólo
+   * `{"country":"AR","region":"Córdoba"}` (o el código de país pelado).
    */
   async fetch(request: Request, env: Env): Promise<Response> {
     const { pathname } = new URL(request.url);
@@ -122,15 +140,17 @@ export default {
       });
     }
     if (pathname === "/people" && request.method === "POST") {
-      const country = (await request.text()).trim().toUpperCase();
-      if (!COUNTRIES.has(country)) {
+      const { country, region } = parsePerson(await request.text());
+      if (!REGIONS.has(country)) {
         return new Response("Unknown country", { status: 400, headers: CORS });
       }
+      // Una región que no es de ese país se guarda como "sin especificar".
+      const known = region && REGIONS.get(country)!.has(region) ? region : "";
       await env.DB.prepare(
-        `INSERT INTO people (day, country, n) VALUES (?1, ?2, 1)
-         ON CONFLICT(day, country) DO UPDATE SET n = n + 1`,
+        `INSERT INTO participants (day, country, region, n) VALUES (?1, ?2, ?3, 1)
+         ON CONFLICT(day, country, region) DO UPDATE SET n = n + 1`,
       )
-        .bind(today(), country)
+        .bind(today(), country, known)
         .run();
       return new Response(null, { status: 204, headers: CORS });
     }
@@ -144,29 +164,58 @@ const CORS = {
   "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
 };
 
-/** Países con representantes cargados: los únicos que acepta `POST /people`. */
-const COUNTRIES = new Set(REPS.values());
-
-type CountryCount = { code: string; count: number };
-type Totals = { mails: CountryCount[]; people: CountryCount[] };
-
-/** Mails (`counts`) y personas (`people`) por país, en los días que cumplen `where`. */
-async function sumByCountry(env: Env, where: string, day: string): Promise<Totals> {
-  const [mails, people] = await env.DB.batch<CountryCount>([
-    env.DB.prepare(
-      `SELECT country AS code, SUM(sent) AS count FROM counts WHERE ${where} GROUP BY country`,
-    ).bind(day),
-    env.DB.prepare(
-      `SELECT country AS code, SUM(n) AS count FROM people WHERE ${where} GROUP BY country`,
-    ).bind(day),
-  ]);
-  return { mails: mails.results, people: people.results };
+/** Cuerpo de `POST /people`: JSON `{ country, region }` o el código de país pelado. */
+function parsePerson(body: string): { country: string; region: string | null } {
+  try {
+    const data = JSON.parse(body) as { country?: unknown; region?: unknown };
+    return {
+      country: String(data.country ?? "").toUpperCase(),
+      region: typeof data.region === "string" ? data.region : null,
+    };
+  } catch {
+    return { country: body.trim().toUpperCase(), region: null };
+  }
 }
 
-function addCounts(...lists: CountryCount[][]): CountryCount[] {
-  const totals = new Map<string, number>();
-  for (const { code, count } of lists.flat()) totals.set(code, (totals.get(code) ?? 0) + count);
-  return [...totals].map(([code, count]) => ({ code, count }));
+/** Una celda de los totales: país + región (`null` = sin especificar). */
+type Part = { code: string; region: string | null; count: number };
+type Totals = { mails: Part[]; people: Part[] };
+
+/**
+ * Mails y personas por país y región, en los días que cumplen `where`. Los
+ * mails van a la región del representante (o `NATIONAL`); las personas, a la
+ * que eligieron en el formulario.
+ */
+async function sumParts(env: Env, where: string, day: string): Promise<Totals> {
+  const [mails, people] = await env.DB.batch([
+    env.DB.prepare(
+      `SELECT email, country, SUM(sent) AS count FROM counts WHERE ${where} GROUP BY email`,
+    ).bind(day),
+    env.DB.prepare(
+      `SELECT country AS code, region, SUM(n) AS count FROM participants
+       WHERE ${where} GROUP BY country, region`,
+    ).bind(day),
+  ]);
+  return {
+    mails: addParts(
+      (mails.results as { email: string; country: string; count: number }[]).map((r) => ({
+        code: r.country,
+        region: REPS.get(r.email)?.region ?? NATIONAL,
+        count: r.count,
+      })),
+    ),
+    people: (people.results as Part[]).map((r) => ({ ...r, region: r.region || null })),
+  };
+}
+
+function addParts(...lists: Part[][]): Part[] {
+  const totals = new Map<string, Part>();
+  for (const p of lists.flat()) {
+    const key = `${p.code}|${p.region ?? ""}`;
+    const prev = totals.get(key);
+    totals.set(key, { ...p, count: (prev?.count ?? 0) + p.count });
+  }
+  return [...totals.values()];
 }
 
 /**
@@ -179,16 +228,17 @@ async function updatePublicStats(env: Env): Promise<void> {
   const day = today();
   const pastRow = await env.DB.prepare(`SELECT value FROM stats WHERE key = 'past'`)
     .first<{ value: string }>();
-  let past = pastRow ? (JSON.parse(pastRow.value) as Partial<Totals> & { through: string }) : null;
-  if (!past || past.through !== day || !past.mails || !past.people) {
-    past = { through: day, ...(await sumByCountry(env, "day < ?1", day)) };
+  let past = pastRow ? (JSON.parse(pastRow.value) as Totals & { through: string; v?: number }) : null;
+  // `v` cambia si cambia la forma de los totales: se recalcula.
+  if (!past || past.through !== day || past.v !== 2) {
+    past = { v: 2, through: day, ...(await sumParts(env, "day < ?1", day)) };
     await putStat(env, "past", past);
   }
-  const current = await sumByCountry(env, "day = ?1", day);
+  const current = await sumParts(env, "day = ?1", day);
   await putStat(env, "public", {
     updatedAt: new Date().toISOString(),
-    mails: addCounts(past.mails!, current.mails),
-    people: addCounts(past.people!, current.people),
+    mails: addParts(past.mails, current.mails),
+    people: addParts(past.people, current.people),
   });
 }
 

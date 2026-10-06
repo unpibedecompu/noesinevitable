@@ -37,3 +37,15 @@ CREATE TABLE IF NOT EXISTS people (
   n INTEGER NOT NULL DEFAULT 0,
   PRIMARY KEY (day, country)
 ) WITHOUT ROWID;
+
+-- Personas por país, provincia/departamento y día (UTC): el sitio suma 1 la
+-- primera vez que alguien aprieta "Enviar" en un navegador (POST /people).
+-- `region` = '' si no eligió una. Reemplaza a `people` (sólo por país), que
+-- quedó sin uso. No se guarda nada que identifique a nadie.
+CREATE TABLE IF NOT EXISTS participants (
+  day TEXT NOT NULL,
+  country TEXT NOT NULL,
+  region TEXT NOT NULL DEFAULT '',
+  n INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY (day, country, region)
+) WITHOUT ROWID;

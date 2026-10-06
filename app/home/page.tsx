@@ -1,10 +1,14 @@
 import Link from "next/link";
 import siteCopy from "@/data/site-copy.json";
-import ParticipationStats from "@/components/ParticipationStats";
+import ParticipationDonuts from "@/components/ParticipationDonuts";
+import { COUNTRIES } from "@/lib/countries";
+import { getRegions } from "@/lib/representatives";
 import CoursesSection from "@/components/CoursesSection";
 import FollowSection from "@/components/FollowSection";
 
 export default function HomePage() {
+  const regionsByCountry = Object.fromEntries(COUNTRIES.map((c) => [c.code, getRegions(c.code)]));
+
   return (
     <main className="mx-auto max-w-2xl px-4 pb-16 pt-8 sm:pt-12">
       <header className="mb-8">
@@ -33,7 +37,7 @@ export default function HomePage() {
           Participación
         </h2>
 
-        <ParticipationStats />
+        <ParticipationDonuts countries={COUNTRIES} regionsByCountry={regionsByCountry} />
       </section>
 
       <div className="mt-8 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-ink/5 sm:p-6">
