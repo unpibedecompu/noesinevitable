@@ -15,6 +15,9 @@ export type Office =
  */
 export type Channel = "email" | "form";
 
+/** Género del representante, para el saludo ("Estimada Diputada…"). */
+export type Gender = "f" | "m";
+
 export interface Representative {
   /** ISO 3166-1 alpha-2, mayúsculas. Ej: "AR" */
   country: string;
@@ -22,6 +25,19 @@ export interface Representative {
   region: string | null;
   office: Office;
   name: string;
+  /**
+   * Casilla institucional (Presidencia, Atención Ciudadana…), no una persona.
+   * `name` es el de la institución (lo que se ve en la UI); el saludo usa
+   * `addressee` si está, o "Estimados/as:" si no.
+   */
+  institutional?: boolean;
+  /**
+   * Titular actual del cargo de una casilla institucional, para el saludo
+   * ("Estimado Presidente Javier Milei:"). Actualizar si cambia el titular.
+   */
+  addressee?: string;
+  /** Género, para el saludo. Si falta en una persona, se usa "Estimado/a Diputado/a". */
+  gender?: Gender;
   /** Canal de contacto. Si falta, se asume "email". */
   channel?: Channel;
   /**

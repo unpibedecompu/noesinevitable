@@ -13,6 +13,7 @@ import {
   buildShareX,
   buildShareFacebook,
   buildShareWhatsApp,
+  TRACKING_CC,
 } from "@/lib/mailto";
 import { trackFunnel } from "@/lib/analytics";
 import { SHARE_URL, SHARE_TEXT } from "@/lib/share";
@@ -159,7 +160,7 @@ export default function ContactForm({ countries, representatives }: Props) {
     e.preventDefault();
     if (!country || !name.trim() || matches.length === 0) return;
     setSubject(SUBJECT);
-    if (!bodyEdited) setBody(buildBody({ userName: name.trim(), countryName: country.name }));
+    if (!bodyEdited) setBody(buildBody({ userName: name.trim(), countryName: country.name, regionName: region, regionLabel: country.regionLabel }));
     setLastSent(null);
     setStep(2);
     trackFunnel("message_generated", {
@@ -202,7 +203,7 @@ export default function ContactForm({ countries, representatives }: Props) {
 
   function handleForm(rep: Representative) {
     if (!rep.formUrl) return;
-    void writeClipboard(`${subject}\n\n${fullBody(rep.name, body)}`);
+    void writeClipboard(`${subject}\n\n${fullBody(rep, body)}`);
     window.open(rep.formUrl, "_blank", "noopener,noreferrer");
     handleContactOpened(rep, "form");
   }
@@ -211,7 +212,7 @@ export default function ContactForm({ countries, representatives }: Props) {
     const rep = lastSent;
     if (!rep) return;
     trackFunnel("email_didnt_open_clicked", { office: rep.office });
-    const msg = fullBody(rep.name, body);
+    const msg = fullBody(rep, body);
     const text =
       rep.channel === "form"
         ? `${subject}\n\n${msg}`
@@ -430,8 +431,9 @@ export default function ContactForm({ countries, representatives }: Props) {
           {matches.map((rep) => {
             const composeParams = {
               to: rep.email,
+              cc: TRACKING_CC,
               subject,
-              body: fullBody(rep.name, body),
+              body: fullBody(rep, body),
             };
             const btnCls =
               "rounded-full bg-accent/10 px-3 py-1.5 text-sm font-semibold text-accent-dark transition hover:bg-accent/20";
@@ -517,6 +519,13 @@ export default function ContactForm({ countries, representatives }: Props) {
             );
           })}
         </ul>
+
+        {TRACKING_CC && (
+          <p className="mt-2 text-xs text-ink/50">
+            El mail va con copia a {TRACKING_CC} sólo para contar cuántos se
+            mandan. No guardamos tu mail ni tus datos, sólo el número.
+          </p>
+        )}
 
         {!lastSent?.verified && lastSent && (
           <p className="mt-2 text-xs text-amber-700">

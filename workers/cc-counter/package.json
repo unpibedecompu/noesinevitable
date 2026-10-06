@@ -1,0 +1,16 @@
+{
+  "name": "noesinevitable-cc-counter",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Email Worker que cuenta los mails con CC a registro@noesinevitable.org.",
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "typecheck": "tsc --noEmit",
+    "schema": "wrangler d1 execute noesinevitable-cc-counter --remote --file=schema.sql"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20261001.1",
+    "typescript": "^5.7.3",
+    "wrangler": "^4.147.0"
+  }
+}

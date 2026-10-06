@@ -27,18 +27,14 @@
 
 ## Alcance de países
 
-- **Limitado a Argentina solamente** (decisión 2026-09-11, ver
-  `lib/countries.ts`). El resto de los países de la fase 1 original
-  (Bolivia, Brasil, Chile, Colombia, Costa Rica, Ecuador, El Salvador,
-  España, Guatemala, Honduras, México, Nicaragua, Panamá, Paraguay,
-  Rep. Dominicana, Uruguay) está comentado en ese archivo, no borrado —
-  reactivar descomentando cuando haya datos verificados de más países.
-- Como consecuencia, el selector de país en el paso 1 se auto-selecciona
-  (un solo botón, sin necesidad de click) — ver `ContactForm.tsx`.
-- Datos de representantes (`data/representatives.json`) igual tienen AR, CO
-  y MX cargados; el filtro a un solo país pasa por `COUNTRIES`
-  (`lib/countries.ts`), no por los datos. Ver `DATA_TODO.md` para el estado
-  de carga/verificación de representantes por país.
+- **Limitado a Argentina y Uruguay** (decisión 2026-09-30, ver
+  `lib/countries.ts`). El resto de los países de la fase 1 original está
+  comentado en ese archivo, no borrado — reactivar descomentando cuando haya
+  datos verificados de más países.
+- `data/representatives.json` tiene sólo AR y UY: las filas del resto de los
+  países (CO, MX, EC, CR, GT, PA, DO) se borraron el 2026-09-30 y quedan en
+  el historial de git. Ver `DATA_TODO.md` para el estado de carga/verificación
+  de representantes por país.
 
 ## Analytics
 
@@ -105,42 +101,73 @@
 
 ## Próximos pasos
 
-- [ ] **Dirección de tracking en CC** (ej. `registro@noesinevitable.org`)
-      para contar envíos reales y no sólo clicks:
-      - Cloudflare Email Routing en `noesinevitable.org` (ojo: reemplaza los
-        MX si el dominio ya recibe mail en otro lado).
-      - **Email Worker + base D1.** El Worker lee sólo el header `To` (no
-        parsear el mail entero: el plan free tiene poco CPU por ejecución),
-        lo matchea contra `representatives.json`, suma 1 a un contador en
-        D1 por representante/país y descarta el mail (sin guardar contenido
-        ni direcciones). Ignorar mails cuyo `To` no sea un representante
-        conocido (ej. "responder a todos" de un despacho).
-        - Esquema D1: **un contador por representante** (upsert), no una
-          fila por mail, y sin índices extra — cada índice cuenta como fila
-          escrita y multiplica el consumo del cupo.
-        - Cupos free: 100k ejecuciones de Worker/día y 100k filas escritas
-          en D1/día (≈100k mails/día con el esquema de arriba). Costo $0;
-          Workers Paid ($5/mes) si hace falta más.
-      - **Alarma por mail cerca del límite diario.** El Worker lleva en D1 un
-        contador de ejecuciones del día; al cruzar ~70% y ~90% de las 100k
-        manda un mail a `lucasvitali001@gmail.com` (una sola vez por umbral
-        por día) con el binding `send_email` de Email Routing — los envíos a
-        direcciones de destino verificadas son gratis. Así se puede pasar a
-        Workers Paid antes de que un pico viral deje mails sin contar.
-      - Agregar `cc` a los links de `lib/mailto.ts` (Gmail web, Outlook web,
-        `mailto:`, deep links mobile — probar en dispositivo real).
-      - Explicar el CC en la UI ("para contar cuántos mails se mandan") y en
-        la política de privacidad.
+- [x] **Dirección de tracking en CC** (`registro@noesinevitable.org`) para
+      contar envíos reales y no sólo clicks. **En producción desde
+      2026-10-06.** Setup y consultas en `workers/cc-counter/README.md`.
+      - Hecho: Email Worker `workers/cc-counter/` (separado del sitio; el
+        `wrangler.jsonc` de la raíz no se tocó). Lee sólo el header `To`, lo
+        matchea contra `representatives.json`, suma 1 en D1 por
+        representante y descarta el mail sin guardar contenido ni
+        direcciones. Ignora mails cuyo `To` no sea un representante conocido
+        y los que *manda* un representante ("responder a todos" de un
+        despacho). Probado en local con `wrangler dev`.
+      - Hecho: esquema D1 con un contador por representante y día (upsert),
+        sin índices extra: **1 fila escrita por mail** → techo free de
+        **~100k mails/día** (100k filas en D1 y 100k ejecuciones de Worker).
+        Costo $0; Workers Paid ($5/mes) si hace falta más.
+      - Hecho: alarma por mail a `lucasvitali001@gmail.com` al cruzar 70% y
+        90% de `DAILY_LIMIT` (100000 por default, en `vars`), una sola vez
+        por umbral por día, con el binding `send_email`. La chequea un cron
+        cada 15 minutos (no cada mail, para no gastar una segunda escritura
+        por mail): puede llegar hasta 15 min tarde, y no cuenta los mails
+        ignorados, que igual gastan ejecuciones.
+      - Hecho en Cloudflare (2026-10-06): Email Routing activado (MX
+        configurados), `lucasvitali001@gmail.com` verificado como destino,
+        base D1 `noesinevitable-cc-counter` creada, Worker deployado y
+        `registro@` ruteado al Worker. Probado con un mail real
+        (`wrangler tail` mostró el evento `Email … Ok`).
+      - Hecho: `cc` en todos los links de `lib/mailto.ts` (Gmail web,
+        Outlook web, `mailto:`, deep links iOS/Android) vía `TRACKING_CC`, y
+        una línea en el paso 3 explicando la copia. **Falta probar los deep
+        links mobile en dispositivo real.**
+      - **Orden de deploy:** primero el setup de Cloudflare y la prueba del
+        README, después mergear la rama. Si el sitio sale con el CC antes,
+        cada copia rebota y el usuario recibe un error de entrega
+        (`TRACKING_CC = ""` lo desactiva).
+      - Riesgo aceptado: cualquiera puede inflar el conteo mandando mails a
+        `registro@` con un representante en `To`. Los números son
+        orientativos, no auditables.
+      - Pendiente: no hay política de privacidad en el sitio; cuando se
+        escriba, mencionar el CC.
 - [ ] **Revisar los datos que se le piden al usuario** para el mail. Hoy es
       sólo nombre (+ provincia para filtrar). Evaluar pedir código postal,
       ciudad u otro dato que haga el mail más creíble como "constituyente"
       real del representante (ControlAI pide dirección / código postal),
       sin romper el objetivo de completar en 10-20 segundos.
-- [ ] **Mails personalizados por representante.** Hoy el saludo ya lleva el
-      nombre (`Estimado/a {nombre},`). Extender: título y género correctos
-      (ej. "Estimada Diputada …"), mencionar su cargo / provincia en el
-      cuerpo. También ayuda a que los servidores de las cámaras no filtren
-      como masivos muchos mails idénticos.
+- [x] **Mails personalizados por representante** (AR + UY, 2026-09-30).
+      `lib/message-template.ts` arma, al abrir cada mail:
+      - Saludo con título y género: "Estimada Diputada {nombre}:" /
+        "Estimado Senador {nombre}:". Sin dato de género → "Estimado/a
+        Diputado/a". Casillas institucionales (`institutional: true`):
+        mismo saludo con el titular actual (`addressee`): "Estimado
+        Presidente Javier Milei:", "Estimada Vicepresidenta Victoria
+        Villarruel:" — **actualizar `addressee`/`gender` si cambia el
+        titular**. Atención Ciudadana del Senado (sin persona) →
+        "Estimados/as:".
+      - Provincia/departamento del usuario en la primera oración: "le
+        escribo como ciudadano/a de la provincia de La Pampa, Argentina" /
+        "del departamento de Rivera, Uruguay" / "de la Ciudad de Buenos
+        Aires, Argentina" (placeholder `{{lugar}}` en `mailContent`, armado
+        en `placeFor` según `regionLabel`; si se suma un país con otra
+        etiqueta, agregarla a `REGION_PREFIX`). Inspirado en ControlAI, cuya
+        plantilla no tiene línea de presentación aparte — dice "I am
+        writing as a constituent" en la primera oración. (Se probó antes una
+        línea "Vivo en X, la provincia que usted representa en…" y sonaba
+        forzada, y después la provincia debajo de la firma.)
+      - Género (`gender: "f" | "m"` en `representatives.json`): diputados AR
+        leídos de la ficha oficial de hcdn.gob.ar ("Diputada"/"Diputado");
+        senadores AR y todo UY inferidos por nombre de pila (la inferencia
+        coincidió 256/256 con las fichas de HCDN).
 - [x] **Link a `noesinevitable.org` en el mail** — agregado como P.D. al
       final de `mailContent` (`data/site-copy.json`): dominio pelado, sin
       `https://` ni parámetros, presentado como aviso ("Le escribo a través

@@ -9,7 +9,7 @@ export const COUNTRIES: CountryConfig[] = [
   // { code: "BO", name: "Bolivia", bicameral: true, regionLabel: "Departamento", headOfGovernmentOffice: "presidente" },
   // { code: "CL", name: "Chile", bicameral: true, regionLabel: "Región", headOfGovernmentOffice: "presidente" },
   // { code: "CO", name: "Colombia", bicameral: true, regionLabel: "Departamento", headOfGovernmentOffice: "presidente" },
-  // CO, CR, EC, GT y DO tienen datos cargados pero no están activados (ver DATA_TODO.md).
+  // Sólo AR y UY tienen datos cargados; el resto se borró de representatives.json (2026-09-30, ver DATA_TODO.md).
   // { code: "CR", name: "Costa Rica", bicameral: false, regionLabel: "Provincia", headOfGovernmentOffice: "presidente" },
   // { code: "EC", name: "Ecuador", bicameral: false, regionLabel: "Provincia", headOfGovernmentOffice: "presidente" },
   // { code: "SV", name: "El Salvador", bicameral: false, regionLabel: "Departamento", headOfGovernmentOffice: "presidente" },
@@ -18,7 +18,7 @@ export const COUNTRIES: CountryConfig[] = [
   // { code: "HN", name: "Honduras", bicameral: false, regionLabel: "Departamento", headOfGovernmentOffice: "presidente" },
   // { code: "MX", name: "México", bicameral: true, regionLabel: "Estado", headOfGovernmentOffice: "presidente" },
   // { code: "NI", name: "Nicaragua", bicameral: false, regionLabel: "Departamento", headOfGovernmentOffice: "presidente" },
-  { code: "PA", name: "Panamá", bicameral: false, regionLabel: "Provincia", headOfGovernmentOffice: "presidente" },
+  // { code: "PA", name: "Panamá", bicameral: false, regionLabel: "Provincia", headOfGovernmentOffice: "presidente" },
   // { code: "PY", name: "Paraguay", bicameral: true, regionLabel: "Departamento", headOfGovernmentOffice: "presidente" },
   // { code: "DO", name: "República Dominicana", bicameral: true, regionLabel: "Provincia", headOfGovernmentOffice: "presidente" },
   { code: "UY", name: "Uruguay", bicameral: true, regionLabel: "Departamento", headOfGovernmentOffice: "presidente" },
