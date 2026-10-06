@@ -21,10 +21,14 @@
       "destination_address": "lucasvitali001@gmail.com"
     }
   ],
+  // Alarma de cupo: cada 15 minutos suma los mails del día.
+  "triggers": {
+    "crons": ["*/15 * * * *"]
+  },
   "vars": {
-    // 2 filas escritas en D1 por mail (contador + ejecuciones del día) →
-    // con el cupo free de 100k filas/día, el techo es ~50k mails/día.
-    "DAILY_LIMIT": "50000",
+    // 1 fila escrita en D1 por mail → el techo free es ~100k mails/día
+    // (100k filas en D1 y 100k ejecuciones de Worker por día).
+    "DAILY_LIMIT": "100000",
     "ALERT_FROM": "alertas@noesinevitable.org",
     "ALERT_TO": "lucasvitali001@gmail.com"
   }

@@ -112,14 +112,19 @@
         direcciones. Ignora mails cuyo `To` no sea un representante conocido
         y los que *manda* un representante ("responder a todos" de un
         despacho). Probado en local con `wrangler dev`.
-      - Hecho: esquema D1 con un contador por representante (upsert) + una
-        fila por día con las ejecuciones, sin índices extra. Son **2 filas
-        escritas por mail** → con el cupo free de D1 (100k filas/día) el
-        techo es **~50k mails/día** (no 100k). Costo $0; Workers Paid
-        ($5/mes) si hace falta más.
+      - Hecho: esquema D1 con un contador por representante y día (upsert),
+        sin índices extra: **1 fila escrita por mail** → techo free de
+        **~100k mails/día** (100k filas en D1 y 100k ejecuciones de Worker).
+        Costo $0; Workers Paid ($5/mes) si hace falta más.
       - Hecho: alarma por mail a `lucasvitali001@gmail.com` al cruzar 70% y
-        90% de `DAILY_LIMIT` (50000 por default, en `vars`), una sola vez
-        por umbral por día, con el binding `send_email`.
+        90% de `DAILY_LIMIT` (100000 por default, en `vars`), una sola vez
+        por umbral por día, con el binding `send_email`. La chequea un cron
+        cada 15 minutos (no cada mail, para no gastar una segunda escritura
+        por mail): puede llegar hasta 15 min tarde, y no cuenta los mails
+        ignorados, que igual gastan ejecuciones.
+      - Hecho en Cloudflare (2026-10-06): Email Routing activado (MX
+        configurados), `lucasvitali001@gmail.com` verificado como destino y
+        base D1 `noesinevitable-cc-counter` creada.
       - Hecho: `cc` en todos los links de `lib/mailto.ts` (Gmail web,
         Outlook web, `mailto:`, deep links iOS/Android) vía `TRACKING_CC`, y
         una línea en el paso 3 explicando la copia. **Falta probar los deep

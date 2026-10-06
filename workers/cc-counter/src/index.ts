@@ -6,12 +6,13 @@
  *   1. lee sólo el header `To` (no parsea el mail entero: el plan free tiene
  *      poco CPU por ejecución),
  *   2. si el destinatario es un representante conocido, suma 1 a su contador
- *      en D1,
+ *      del día en D1 — una sola fila escrita por mail,
  *   3. descarta el mail — no se guarda contenido ni direcciones del remitente.
  *
- * Además lleva la cuenta de ejecuciones del día y avisa por mail al cruzar el
- * 70% y el 90% de `DAILY_LIMIT`, para pasar a Workers Paid antes de que un
- * pico deje mails sin contar. Ver README.md.
+ * La alarma de cupo corre aparte, en un cron cada 15 minutos: suma los mails
+ * del día y avisa por mail al cruzar el 70% y el 90% de `DAILY_LIMIT`, para
+ * pasar a Workers Paid antes de que un pico deje mails sin contar. Ver
+ * README.md.
  */
 import { EmailMessage } from "cloudflare:email";
 import representatives from "../../../data/representatives.json";
@@ -37,6 +38,9 @@ const THRESHOLDS = [
   { pct: 90, bit: 2 },
 ];
 
+/** Día actual en UTC, `YYYY-MM-DD`. */
+const today = () => new Date().toISOString().slice(0, 10);
+
 /** Direcciones de un header tipo `"Nombre" <a@b.com>, c@d.com`, en minúsculas. */
 function addresses(header: string | null): string[] {
   if (!header) return [];
@@ -47,15 +51,6 @@ function addresses(header: string | null): string[] {
 
 export default {
   async email(message: ForwardableEmailMessage, env: Env): Promise<void> {
-    const day = new Date().toISOString().slice(0, 10);
-    const row = await env.DB.prepare(
-      `INSERT INTO daily (day, executions) VALUES (?1, 1)
-       ON CONFLICT(day) DO UPDATE SET executions = executions + 1
-       RETURNING executions, alerted`,
-    )
-      .bind(day)
-      .first<{ executions: number; alerted: number }>();
-
     // Respuesta de un despacho con "responder a todos": la manda el
     // representante, no un ciudadano — no se cuenta.
     const fromRep = addresses(message.headers.get("from")).some((a) =>
@@ -67,45 +62,56 @@ export default {
 
     if (rep) {
       await env.DB.prepare(
-        `INSERT INTO counts (email, country, sent) VALUES (?1, ?2, 1)
-         ON CONFLICT(email) DO UPDATE SET sent = sent + 1`,
+        `INSERT INTO counts (day, email, country, sent) VALUES (?1, ?2, ?3, 1)
+         ON CONFLICT(day, email) DO UPDATE SET sent = sent + 1`,
       )
-        .bind(rep, REPS.get(rep))
+        .bind(today(), rep, REPS.get(rep))
         .run();
     }
-
-    if (row) await maybeAlert(env, day, row.executions, row.alerted);
     // Sin forward ni reject: Email Routing descarta el mail.
+  },
+
+  async scheduled(_controller: ScheduledController, env: Env): Promise<void> {
+    const day = today();
+    // La clave primaria empieza por `day`: sólo se leen las filas de hoy
+    // (a lo sumo una por representante).
+    const row = await env.DB.prepare(
+      `SELECT
+         (SELECT COALESCE(SUM(sent), 0) FROM counts WHERE day = ?1) AS sent,
+         (SELECT COALESCE(alerted, 0) FROM alerts WHERE day = ?1) AS alerted`,
+    )
+      .bind(day)
+      .first<{ sent: number; alerted: number | null }>();
+    if (row) await maybeAlert(env, day, row.sent, row.alerted ?? 0);
   },
 };
 
 async function maybeAlert(
   env: Env,
   day: string,
-  executions: number,
+  sent: number,
   alerted: number,
 ): Promise<void> {
-  const limit = Number(env.DAILY_LIMIT) || 50000;
+  const limit = Number(env.DAILY_LIMIT) || 100000;
   for (const { pct, bit } of THRESHOLDS) {
-    if (executions < (limit * pct) / 100 || alerted & bit) continue;
-    // Marca el umbral antes de mandar; el `WHERE` evita que dos ejecuciones
-    // simultáneas manden el mismo aviso.
-    const claimed = await env.DB.prepare(
-      `UPDATE daily SET alerted = alerted | ?2
-       WHERE day = ?1 AND (alerted & ?2) = 0`,
+    if (sent < (limit * pct) / 100 || alerted & bit) continue;
+    await env.DB.prepare(
+      `INSERT INTO alerts (day, alerted) VALUES (?1, ?2)
+       ON CONFLICT(day) DO UPDATE SET alerted = alerted | ?2`,
     )
       .bind(day, bit)
       .run();
-    if (claimed.meta.changes !== 1) continue;
 
-    const subject = `noesinevitable.org: ${pct}% del cupo diario de mails (${executions}/${limit})`;
+    const subject = `noesinevitable.org: ${pct}% del cupo diario de mails (${sent}/${limit})`;
     const body = [
-      `Hoy (${day}, UTC) el Worker cc-counter ya procesó ${executions} mails,`,
+      `Hoy (${day}, UTC) el Worker cc-counter ya contó ${sent} mails,`,
       `el ${pct}% del tope configurado (DAILY_LIMIT = ${limit}).`,
       "",
       "Cupos del plan free: 100k ejecuciones de Worker/día y 100k filas",
-      "escritas en D1/día (2 por mail → ~50k mails/día). Si sigue subiendo,",
-      "pasar a Workers Paid ($5/mes) para no perder conteos.",
+      "escritas en D1/día (1 por mail). Los mails ignorados (respuestas de",
+      "despachos, direcciones desconocidas) también gastan ejecuciones y no",
+      "aparecen en este número. Si sigue subiendo, pasar a Workers Paid",
+      "($5/mes) para no perder conteos.",
     ].join("\r\n");
     const raw = [
       `From: noesinevitable.org <${env.ALERT_FROM}>`,
