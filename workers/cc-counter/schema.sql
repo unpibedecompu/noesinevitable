@@ -19,3 +19,11 @@ CREATE TABLE IF NOT EXISTS notices (
   key TEXT PRIMARY KEY,
   alerted INTEGER NOT NULL DEFAULT 0
 ) WITHOUT ROWID;
+
+-- Totales públicos, recalculados por el cron de 15 minutos. `public`: lo que
+-- devuelve GET /stats ({ updatedAt, byCountry }); `past`: suma de los días
+-- anteriores a `through`, para no releer toda `counts` en cada corrida.
+CREATE TABLE IF NOT EXISTS stats (
+  key TEXT PRIMARY KEY,
+  value TEXT NOT NULL
+) WITHOUT ROWID;

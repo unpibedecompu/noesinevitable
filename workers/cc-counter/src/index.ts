@@ -9,6 +9,10 @@
  *      del día en D1 — una sola fila escrita por mail,
  *   3. descarta el mail — no se guarda contenido ni direcciones del remitente.
  *
+ * Totales públicos: el cron de 15 minutos guarda los mails por país en una
+ * sola fila de D1, y `GET /stats` devuelve esa fila (la usa /home del sitio).
+ * Así cada visita lee 1 fila, no toda la tabla.
+ *
  * Alarmas por mail a `ALERT_TO`, al cruzar el 70% y el 90% de cada cupo (una
  * vez por umbral y período):
  *   - cupo diario de este Worker/D1 (`DAILY_LIMIT`), cron cada 15 minutos;
@@ -89,9 +93,81 @@ export default {
 
   async scheduled(controller: ScheduledController, env: Env): Promise<void> {
     if (controller.cron === UMAMI_CRON) await checkUmami(env);
-    else await checkDaily(env);
+    else {
+      await updatePublicStats(env);
+      await checkDaily(env);
+    }
+  },
+
+  /** `GET /stats`: mails por país, sólo totales (nada personal). */
+  async fetch(request: Request, env: Env): Promise<Response> {
+    const { pathname } = new URL(request.url);
+    if (request.method === "OPTIONS") return new Response(null, { headers: CORS });
+    if (pathname !== "/stats" || request.method !== "GET") {
+      return new Response("Not found", { status: 404, headers: CORS });
+    }
+    const row = await env.DB.prepare(`SELECT value FROM stats WHERE key = 'public'`)
+      .first<{ value: string }>();
+    return new Response(row?.value ?? JSON.stringify({ updatedAt: null, byCountry: [] }), {
+      headers: {
+        ...CORS,
+        "Content-Type": "application/json; charset=utf-8",
+        "Cache-Control": "public, max-age=300",
+      },
+    });
   },
 };
+
+/** Los totales son públicos: cualquier origen puede leerlos. */
+const CORS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET, OPTIONS",
+};
+
+type CountryCount = { code: string; count: number };
+
+async function sumByCountry(env: Env, where: string, day: string): Promise<CountryCount[]> {
+  const { results } = await env.DB.prepare(
+    `SELECT country AS code, SUM(sent) AS count FROM counts WHERE ${where} GROUP BY country`,
+  )
+    .bind(day)
+    .all<CountryCount>();
+  return results;
+}
+
+/**
+ * Recalcula los totales públicos (`stats` → 'public'). Para no leer toda la
+ * tabla cada 15 minutos, los días anteriores a hoy se suman una vez por día
+ * y quedan guardados en `stats` → 'past'; cada corrida suma sólo las filas
+ * de hoy.
+ */
+async function updatePublicStats(env: Env): Promise<void> {
+  const day = today();
+  const pastRow = await env.DB.prepare(`SELECT value FROM stats WHERE key = 'past'`)
+    .first<{ value: string }>();
+  let past = pastRow ? (JSON.parse(pastRow.value) as { through: string; byCountry: CountryCount[] }) : null;
+  if (!past || past.through !== day) {
+    past = { through: day, byCountry: await sumByCountry(env, "day < ?1", day) };
+    await putStat(env, "past", past);
+  }
+  const totals = new Map<string, number>();
+  for (const { code, count } of [...past.byCountry, ...(await sumByCountry(env, "day = ?1", day))]) {
+    totals.set(code, (totals.get(code) ?? 0) + count);
+  }
+  await putStat(env, "public", {
+    updatedAt: new Date().toISOString(),
+    byCountry: [...totals].map(([code, count]) => ({ code, count })),
+  });
+}
+
+async function putStat(env: Env, key: string, value: unknown): Promise<void> {
+  await env.DB.prepare(
+    `INSERT INTO stats (key, value) VALUES (?1, ?2)
+     ON CONFLICT(key) DO UPDATE SET value = ?2`,
+  )
+    .bind(key, JSON.stringify(value))
+    .run();
+}
 
 /** Cupo diario de mails contados (Worker + D1). */
 async function checkDaily(env: Env): Promise<void> {

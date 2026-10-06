@@ -187,6 +187,12 @@
       más** en Umami). Si la API falla, avisa por mail (uno por día).
       Detalle y setup de la API key en `workers/cc-counter/README.md` →
       "Alarma de Umami".
+- [ ] **Contador en vivo en el paso 1 del formulario** ("Ya se enviaron N
+      mails a representantes"), con los mismos datos que /home
+      (`fetchLiveCounts` en `lib/mail-stats.ts`). Prueba social justo donde
+      la gente decide escribir.
+- [ ] **Revisar el texto debajo del título en /home** ("Sobre esta
+      iniciativa": la explicación y el párrafo de cómo funciona).
 - [ ] Reactivar más países en `lib/countries.ts` cuando haya datos
       verificados (ver `DATA_TODO.md`).
 
@@ -202,5 +208,11 @@
       `body_edited`, `step_back_clicked`. Mantener los del embudo principal
       (`country_selected`, `message_generated`, `email_client_opened`,
       `email_sent_confirmed`, `shared`, `course_clicked`).
-- [ ] **Automatizar la visualización de analytics de /home** (hoy se mira a
-      mano en los dashboards de Cloudflare y Umami).
+- [x] **Automatizar la visualización de /home** (2026-10-06). El gráfico
+      muestra **mails enviados** por país, en vivo: el Worker
+      `workers/cc-counter` recalcula los totales cada 15 minutos y los
+      publica en `GET /stats` (sólo totales por país); /home los pide al
+      abrir (`components/MailStatsChart.tsx`). Se suma una base fija con los
+      mails de antes del conteo por CC (`data/mail-sent-stats.json`: 57
+      según Umami, repartidos 52 AR / 5 UY según los remitentes de cada
+      país). Si el Worker no responde, se ve sólo la base.

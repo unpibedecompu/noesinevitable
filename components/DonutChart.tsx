@@ -17,6 +17,9 @@ const STROKE = 28;
 const GAP = 3; // px de "aire" (color de superficie) entre segmentos
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
+const fmt = (n: number) => n.toLocaleString("es-AR");
+const mails = (n: number) => (n === 1 ? "mail" : "mails");
+
 /**
  * Donut (pie con el centro vacío): cada slice es un arco dibujado con
  * stroke-dasharray sobre un círculo, dejando un hueco de GAP px entre
@@ -28,7 +31,7 @@ export default function DonutChart({ slices, total }: Props) {
 
   let offset = 0;
   const arcs = slices.map((s) => {
-    const length = (s.count / total) * usable;
+    const length = total > 0 ? (s.count / total) * usable : 0;
     const arc = { ...s, length, offset };
     offset += length + GAP;
     return arc;
@@ -38,8 +41,8 @@ export default function DonutChart({ slices, total }: Props) {
     <svg
       viewBox={`0 0 ${SIZE} ${SIZE}`}
       role="img"
-      aria-label={`${total} ${total === 1 ? "persona" : "personas"} ya le escribieron a sus representantes: ${slices
-        .map((s) => `${s.name} ${s.count}`)
+      aria-label={`${fmt(total)} ${mails(total)} enviados a representantes: ${slices
+        .map((s) => `${s.name} ${fmt(s.count)}`)
         .join(", ")}`}
       className="mx-auto h-52 w-52"
     >
@@ -67,7 +70,7 @@ export default function DonutChart({ slices, total }: Props) {
           transform={`rotate(-90 ${CENTER} ${CENTER})`}
         >
           <title>
-            {arc.name}: {arc.count} {arc.count === 1 ? "persona" : "personas"}
+            {arc.name}: {fmt(arc.count)} {mails(arc.count)}
           </title>
         </circle>
       ))}
@@ -77,7 +80,7 @@ export default function DonutChart({ slices, total }: Props) {
         textAnchor="middle"
         className="fill-ink text-3xl font-bold"
       >
-        {total}
+        {fmt(total)}
       </text>
       <text
         x={CENTER}
@@ -85,7 +88,7 @@ export default function DonutChart({ slices, total }: Props) {
         textAnchor="middle"
         className="fill-ink/50 text-[10px] font-semibold uppercase tracking-wide"
       >
-        {total === 1 ? "carta enviada" : "cartas enviadas"}
+        {total === 1 ? "mail enviado" : "mails enviados"}
       </text>
     </svg>
   );

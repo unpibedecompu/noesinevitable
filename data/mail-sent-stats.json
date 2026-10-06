@@ -1,8 +1,8 @@
 {
-  "updatedAt": "2026-09-18",
-  "note": "Carga manual desde el dashboard de Umami (evento email_sent_confirmed no tiene la propiedad país todavía — ver lib/analytics.ts). Actualizar a mano hasta que se instrumente.",
+  "note": "Mails abiertos antes de que existiera el conteo por CC (2026-10-06), según Umami: 57 en total, repartidos según los remitentes de cada país (10 AR, 1 UY). /home suma esto a los totales en vivo del Worker cc-counter (GET /stats).",
+  "before": "2026-10-06",
   "byCountry": [
-    { "code": "AR", "count": 10 },
-    { "code": "UY", "count": 1 }
+    { "code": "AR", "count": 52 },
+    { "code": "UY", "count": 5 }
   ]
 }
