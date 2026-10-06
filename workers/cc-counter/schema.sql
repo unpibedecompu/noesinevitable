@@ -19,3 +19,33 @@ CREATE TABLE IF NOT EXISTS notices (
   key TEXT PRIMARY KEY,
   alerted INTEGER NOT NULL DEFAULT 0
 ) WITHOUT ROWID;
+
+-- Totales públicos, recalculados por el cron de 15 minutos. `public`: lo que
+-- devuelve GET /stats ({ updatedAt, byCountry }); `past`: suma de los días
+-- anteriores a `through`, para no releer toda `counts` en cada corrida.
+CREATE TABLE IF NOT EXISTS stats (
+  key TEXT PRIMARY KEY,
+  value TEXT NOT NULL
+) WITHOUT ROWID;
+
+-- Personas por país y día (UTC): el sitio suma 1 la primera vez que alguien
+-- aprieta "Enviar" en un navegador (POST /people). Upsert: 1 fila escrita
+-- por persona. No se guarda nada que identifique a nadie.
+CREATE TABLE IF NOT EXISTS people (
+  day TEXT NOT NULL,
+  country TEXT NOT NULL,
+  n INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY (day, country)
+) WITHOUT ROWID;
+
+-- Personas por país, provincia/departamento y día (UTC): el sitio suma 1 la
+-- primera vez que alguien aprieta "Enviar" en un navegador (POST /people).
+-- `region` = '' si no eligió una. Reemplaza a `people` (sólo por país), que
+-- quedó sin uso. No se guarda nada que identifique a nadie.
+CREATE TABLE IF NOT EXISTS participants (
+  day TEXT NOT NULL,
+  country TEXT NOT NULL,
+  region TEXT NOT NULL DEFAULT '',
+  n INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY (day, country, region)
+) WITHOUT ROWID;

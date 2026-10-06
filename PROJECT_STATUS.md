@@ -187,6 +187,12 @@
       más** en Umami). Si la API falla, avisa por mail (uno por día).
       Detalle y setup de la API key en `workers/cc-counter/README.md` →
       "Alarma de Umami".
+- [ ] **Contador en vivo en el paso 1 del formulario** ("Ya se enviaron N
+      mails a representantes"), con los mismos datos que /home
+      (`fetchLiveCounts` en `lib/mail-stats.ts`). Prueba social justo donde
+      la gente decide escribir.
+- [ ] **Revisar el texto debajo del título en /home** ("Sobre esta
+      iniciativa": la explicación y el párrafo de cómo funciona).
 - [ ] Reactivar más países en `lib/countries.ts` cuando haya datos
       verificados (ver `DATA_TODO.md`).
 
@@ -202,5 +208,21 @@
       `body_edited`, `step_back_clicked`. Mantener los del embudo principal
       (`country_selected`, `message_generated`, `email_client_opened`,
       `email_sent_confirmed`, `shared`, `course_clicked`).
-- [ ] **Automatizar la visualización de analytics de /home** (hoy se mira a
-      mano en los dashboards de Cloudflare y Umami).
+- [x] **Automatizar la visualización de /home** (2026-10-06). El gráfico
+      muestra en vivo dos donuts (personas y mails) con filtro por país en
+      chips y una tabla debajo (fila de total + una por país, o por
+      provincia/departamento si se eligió un país, cada uno con su color):
+      **personas** (navegadores donde
+      alguien apretó "Enviar" al menos una vez: `recordPerson` hace
+      `POST /people` con sólo el código de país y marca el navegador en
+      localStorage) y **mails enviados** (copias a registro@). El Worker
+      `workers/cc-counter` recalcula los totales cada 15 minutos y los
+      publica en `GET /stats`; /home los pide al abrir
+      (`components/ParticipationDonuts.tsx`). Las personas se cuentan por
+      la región que eligieron en el formulario; los mails, por la del
+      representante que los recibió ("Cargos nacionales" si es nacional). Se suma una base fija con la
+      participación de antes del conteo automático
+      (`data/mail-sent-stats.json`: 11 personas y 57 mails según Umami). Si
+      el Worker no responde, se ve sólo la base. Aproximado: una persona en
+      dos dispositivos, o que borra los datos del navegador, cuenta dos
+      veces, y cualquiera podría inflar los números a mano.

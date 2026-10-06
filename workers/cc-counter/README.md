@@ -79,6 +79,24 @@ Todo desde `workers/cc-counter/`, con la cuenta de Cloudflare dueña de
    antes, cada copia a `registro@` rebota y el usuario recibe un aviso de
    error de entrega.
 
+## Totales públicos (`GET /stats`)
+
+`https://noesinevitable-cc-counter.unpibedecompu.workers.dev/stats` devuelve
+mails y personas por país (`{ updatedAt, mails: [{ code, count }], people:
+[…] }`), sin nada personal y con CORS abierto. Lo usan los gráficos de /home
+(`lib/mail-stats.ts`).
+
+**Personas:** el sitio hace `POST /people` con el código de país como único
+contenido la primera vez que alguien aprieta "Enviar" en un navegador
+(`recordPerson`); se suma 1 en la tabla `people` por país y día. Acepta sólo
+países con representantes cargados.
+
+Para no leer las tablas enteras en cada visita, el cron de 15 minutos
+guarda el resultado en la tabla `stats` (fila `public`) y `/stats` lee sólo
+esa fila. Los días anteriores se suman una vez por día (fila `past`); cada
+corrida suma sólo las filas de hoy. Los números pueden tener hasta 15
+minutos de atraso.
+
 ## Alarma de Umami
 
 Umami Cloud no manda alertas de uso ni tiene API de uso (la página *Settings →
