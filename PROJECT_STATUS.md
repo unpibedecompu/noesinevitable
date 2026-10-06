@@ -209,9 +209,9 @@
       (`country_selected`, `message_generated`, `email_client_opened`,
       `email_sent_confirmed`, `shared`, `course_clicked`).
 - [x] **Automatizar la visualización de /home** (2026-10-06). El gráfico
-      muestra en vivo dos donuts (personas y mails) con filtro por país y
-      una tabla debajo (fila de total + una por país; tocar un país, o su
-      filtro, muestra sus provincias/departamentos, cada uno con su color):
+      muestra en vivo dos donuts (personas y mails) con filtro por país en
+      chips y una leyenda debajo; elegir un país muestra sus provincias/
+      departamentos, cada uno con su color:
       **personas** (navegadores donde
       alguien apretó "Enviar" al menos una vez: `recordPerson` hace
       `POST /people` con sólo el código de país y marca el navegador en
