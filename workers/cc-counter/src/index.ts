@@ -229,19 +229,19 @@ async function maybeAlert(
   }
 }
 
-/** Manda `message` salvo que el bit `bit` de `key` ya esté marcado en `alerts`. */
+/** Manda `message` salvo que el bit `bit` de `key` ya esté marcado en `notices`. */
 async function notifyOnce(
   env: Env,
   key: string,
   bit: number,
   message: Message,
 ): Promise<void> {
-  const row = await env.DB.prepare(`SELECT alerted FROM alerts WHERE key = ?1`)
+  const row = await env.DB.prepare(`SELECT alerted FROM notices WHERE key = ?1`)
     .bind(key)
     .first<{ alerted: number }>();
   if ((row?.alerted ?? 0) & bit) return;
   await env.DB.prepare(
-    `INSERT INTO alerts (key, alerted) VALUES (?1, ?2)
+    `INSERT INTO notices (key, alerted) VALUES (?1, ?2)
      ON CONFLICT(key) DO UPDATE SET alerted = alerted | ?2`,
   )
     .bind(key, bit)
