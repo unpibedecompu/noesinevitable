@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Editor del mail</title>
+<!--
+  Editor local del texto del mail (`subject` y `mailContent` de
+  data/site-copy.json). Uso normal: `npm run edit:mail` y abrir
+  http://localhost:3001 — carga el JSON solo y "Guardar" escribe el archivo
+  (ver scripts/editar-mail.mjs). Abierto como archivo suelto, hay que apretar
+  "Abrir" y elegir data/site-copy.json (guardar directo sólo en Chrome/Edge).
+  Las demás claves del JSON no se tocan.
+-->
+<style>
+  :root {
+    --bg: #f6f5f1; --panel: #fff; --ink: #1d1d1b; --muted: #6b6a66;
+    --line: #dddad2; --accent: #f2c14e; --warn-bg: #fff4d6; --warn: #7a5a00;
+    --ok: #2e7d32; --mark: #fdeaa8;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #161614; --panel: #22221f; --ink: #ecebe6; --muted: #a3a29c;
+      --line: #3a3934; --accent: #f2c14e; --warn-bg: #3a3014; --warn: #f2d48a;
+      --ok: #81c784; --mark: #5a4a14;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+    font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  header { display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+    padding: 12px 16px; border-bottom: 1px solid var(--line); background: var(--panel);
+    position: sticky; top: 0; z-index: 1; }
+  header h1 { font-size: 16px; margin: 0 12px 0 0; }
+  #status { color: var(--muted); font-size: 13px; margin-left: auto; }
+  #status.dirty { color: var(--warn); font-weight: 600; }
+  #status.saved { color: var(--ok); font-weight: 600; }
+  button { font: inherit; border: 1px solid var(--line); background: var(--panel); color: var(--ink);
+    border-radius: 999px; padding: 6px 14px; cursor: pointer; }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #1d1d1b; font-weight: 600; }
+  button:disabled { opacity: .45; cursor: not-allowed; }
+  main { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 16px; }
+  @media (max-width: 900px) { main { grid-template-columns: 1fr; } }
+  section { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px; min-width: 0; }
+  h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin: 0 0 10px; }
+  label { display: block; font-weight: 600; font-size: 14px; margin: 12px 0 4px; }
+  input[type=text], textarea, select { width: 100%; font: inherit; color: var(--ink); background: var(--bg);
+    border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; }
+  textarea { min-height: 520px; resize: vertical; line-height: 1.55; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+  .chips button { font-size: 12px; padding: 3px 10px; font-family: ui-monospace, Consolas, monospace; }
+  .hint { color: var(--muted); font-size: 13px; margin: 6px 0 0; }
+  .warn { background: var(--warn-bg); color: var(--warn); border-radius: 8px; padding: 8px 10px; font-size: 13px; margin-top: 10px; }
+  .warn:empty { display: none; }
+  .row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  @media (max-width: 600px) { .row { grid-template-columns: 1fr; } }
+  #preview { white-space: pre-wrap; background: var(--bg); border: 1px solid var(--line); border-radius: 8px;
+    padding: 14px; margin-top: 12px; font-size: 14px; }
+  #preview mark { background: var(--mark); color: inherit; border-radius: 3px; padding: 0 2px; }
+  .subject { font-weight: 600; }
+  #empty { padding: 48px 16px; text-align: center; color: var(--muted); }
+</style>
+</head>
+<body>
+<header>
+  <h1>Editor del mail</h1>
+  <button id="open" class="primary">Abrir data/site-copy.json</button>
+  <button id="save" disabled>Guardar</button>
+  <button id="revert" disabled>Descartar cambios</button>
+  <span id="status">Sin archivo abierto</span>
+  <input id="fallback" type="file" accept=".json,application/json" hidden>
+</header>
+
+<div id="empty">Apretá <b>Abrir</b> y elegí <code>data/site-copy.json</code> del repo.</div>
+
+<main id="app" hidden>
+  <section>
+    <h2>Texto</h2>
+    <label for="subject">Asunto</label>
+    <input id="subject" type="text">
+    <label for="body">Cuerpo <span class="hint">(sin saludo: el saludo lo agrega el sitio según el representante)</span></label>
+    <textarea id="body" spellcheck="true"></textarea>
+    <div class="chips" aria-label="Insertar variable">
+      <button data-ph="{{nombre}}" title="Nombre y apellido del remitente">{{nombre}}</button>
+      <button data-ph="{{ciudadano}}" title="ciudadana / ciudadano / ciudadano/a según el sexo elegido">{{ciudadano}}</button>
+      <button data-ph="{{lugar}}" title='"de la provincia de Córdoba, Argentina", con la preposición incluida'>{{lugar}}</button>
+      <button data-ph="{{pais}}" title="Argentina / Uruguay">{{pais}}</button>
+    </div>
+    <p class="hint">Click en una variable para insertarla donde está el cursor.</p>
+    <div id="warnings" class="warn"></div>
+  </section>
+
+  <section>
+    <h2>Vista previa</h2>
+    <div class="row">
+      <div>
+        <label for="pSex">Sexo</label>
+        <select id="pSex">
+          <option value="f">Femenino</option>
+          <option value="m">Masculino</option>
+          <option value="x">Otro</option>
+        </select>
+      </div>
+      <div>
+        <label for="pPlace">Lugar</label>
+        <select id="pPlace">
+          <option value="cba">Córdoba (AR)</option>
+          <option value="caba">CABA (AR)</option>
+          <option value="riv">Rivera (UY)</option>
+          <option value="nac">Sólo nacional (AR)</option>
+        </select>
+      </div>
+      <div>
+        <label for="pName">Nombre</label>
+        <input id="pName" type="text" value="Ana Pérez">
+      </div>
+    </div>
+    <div id="preview"></div>
+    <p class="hint">Resaltado: lo que cambia según el remitente. El saludo es un ejemplo.</p>
+  </section>
+</main>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const KNOWN = ["{{nombre}}", "{{ciudadano}}", "{{lugar}}", "{{pais}}"];
+const REQUIRED = ["{{nombre}}", "{{ciudadano}}", "{{lugar}}"];
+const PLACES = {
+  cba:  { lugar: "de la provincia de Córdoba, Argentina", pais: "Argentina", saludo: "Estimada Diputada Alejandra Torres:" },
+  caba: { lugar: "de la Ciudad de Buenos Aires, Argentina", pais: "Argentina", saludo: "Estimado Diputado Juan Pérez:" },
+  riv:  { lugar: "del departamento de Rivera, Uruguay", pais: "Uruguay", saludo: "Estimado Diputado Juan Pérez:" },
+  nac:  { lugar: "de Argentina", pais: "Argentina", saludo: "Estimado Presidente Javier Milei:" },
+};
+const CIUDADANO = { f: "ciudadana", m: "ciudadano", x: "ciudadano/a" };
+
+// Servido por scripts/editar-mail.mjs: lee y guarda por /api/site-copy.
+const API = location.protocol.startsWith("http") ? "/api/site-copy" : null;
+let handle = null;      // FileSystemFileHandle (Chrome/Edge, modo archivo suelto)
+let fileName = "site-copy.json";
+let data = null;        // JSON completo, para no perder las otras claves
+let original = null;    // { subject, mailContent } tal como se abrió
+
+function setStatus(text, cls = "") { const s = $("status"); s.textContent = text; s.className = cls; }
+const dirty = () => data && ($("subject").value !== original.subject || $("body").value !== original.mailContent);
+
+function refresh() {
+  if (!data) return;
+  const d = dirty();
+  $("save").disabled = !d;
+  $("revert").disabled = !d;
+  if (d) setStatus("Cambios sin guardar", "dirty");
+  else if ($("status").className === "dirty") setStatus(`Abierto: ${fileName}`);
+
+  const body = $("body").value;
+  const warns = [];
+  for (const p of REQUIRED) if (!body.includes(p)) warns.push(`Falta ${p}.`);
+  const unknown = [...new Set(body.match(/\{\{[^}]*\}\}/g) || [])].filter((p) => !KNOWN.includes(p));
+  if (unknown.length) warns.push(`Variable desconocida: ${unknown.join(", ")} (el sitio la dejaría tal cual).`);
+  if (!$("subject").value.trim()) warns.push("El asunto está vacío.");
+  $("warnings").textContent = warns.join(" ");
+
+  const place = PLACES[$("pPlace").value];
+  const values = {
+    "{{nombre}}": $("pName").value || "[tu nombre]",
+    "{{ciudadano}}": CIUDADANO[$("pSex").value],
+    "{{lugar}}": place.lugar,
+    "{{pais}}": place.pais,
+  };
+  const esc = (t) => t.replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[c]);
+  const filled = esc(body).replace(/\{\{(nombre|ciudadano|lugar|pais)\}\}/g, (m) => `<mark>${esc(values[m])}</mark>`);
+  $("preview").innerHTML =
+    `<span class="subject">Asunto: ${esc($("subject").value)}</span>\n\n<mark>${esc(place.saludo)}</mark>\n\n${filled}`;
+}
+
+function load(text, name) {
+  let parsed;
+  try { parsed = JSON.parse(text); } catch (e) { alertBox(`No es un JSON válido: ${e.message}`); return; }
+  if (typeof parsed.subject !== "string" || typeof parsed.mailContent !== "string") {
+    alertBox("Ese archivo no tiene \"subject\" y \"mailContent\". ¿Es data/site-copy.json?"); return;
+  }
+  data = parsed; fileName = name;
+  original = { subject: parsed.subject, mailContent: parsed.mailContent };
+  $("subject").value = original.subject;
+  $("body").value = original.mailContent;
+  $("empty").hidden = true; $("app").hidden = false;
+  setStatus(`Abierto: ${fileName}`);
+  refresh();
+}
+
+function alertBox(msg) { $("empty").hidden = false; $("empty").textContent = msg; }
+
+$("open").onclick = async () => {
+  if (dirty() && !confirm("Hay cambios sin guardar. ¿Abrir otro archivo igual?")) return;
+  if (window.showOpenFilePicker) {
+    try {
+      [handle] = await showOpenFilePicker({ types: [{ description: "JSON", accept: { "application/json": [".json"] } }] });
+      const f = await handle.getFile();
+      load(await f.text(), f.name);
+    } catch (e) { if (e.name !== "AbortError") alertBox(e.message); }
+  } else {
+    $("fallback").click();
+  }
+};
+$("fallback").onchange = async (e) => {
+  const f = e.target.files[0]; if (!f) return;
+  handle = null; load(await f.text(), f.name);
+};
+
+$("save").onclick = async () => {
+  data.subject = $("subject").value;
+  data.mailContent = $("body").value;
+  const out = JSON.stringify(data, null, 2) + "\n";
+  try {
+    if (API) {
+      const r = await fetch(API, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ subject: data.subject, mailContent: data.mailContent }),
+      });
+      if (!r.ok) throw new Error((await r.json()).error || `HTTP ${r.status}`);
+      setStatus(`Guardado en data/site-copy.json · ${new Date().toLocaleTimeString()}`, "saved");
+    } else if (handle) {
+      const w = await handle.createWritable();
+      await w.write(out); await w.close();
+      setStatus(`Guardado en ${fileName} · ${new Date().toLocaleTimeString()}`, "saved");
+    } else {
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(new Blob([out], { type: "application/json" }));
+      a.download = "site-copy.json"; a.click(); URL.revokeObjectURL(a.href);
+      setStatus("Descargado: reemplazá data/site-copy.json con ese archivo", "saved");
+    }
+    original = { subject: data.subject, mailContent: data.mailContent };
+    $("save").disabled = true; $("revert").disabled = true;
+  } catch (e) { setStatus(`No se pudo guardar: ${e.message}`, "dirty"); }
+};
+
+$("revert").onclick = () => {
+  if (!confirm("¿Descartar los cambios sin guardar?")) return;
+  $("subject").value = original.subject; $("body").value = original.mailContent;
+  setStatus(`Abierto: ${fileName}`); refresh();
+};
+
+document.querySelectorAll("[data-ph]").forEach((b) => b.onclick = () => {
+  const t = $("body"), ph = b.dataset.ph, s = t.selectionStart, e = t.selectionEnd;
+  t.setRangeText(ph, s, e, "end"); t.focus(); refresh();
+});
+for (const id of ["subject", "body", "pName"]) $(id).addEventListener("input", refresh);
+for (const id of ["pSex", "pPlace"]) $(id).addEventListener("change", refresh);
+if (API) {
+  $("open").hidden = true;
+  fetch(API)
+    .then((r) => (r.ok ? r.text() : Promise.reject(new Error(`HTTP ${r.status}`))))
+    .then((t) => load(t, "data/site-copy.json"))
+    .catch((e) => alertBox(`No pude leer data/site-copy.json: ${e.message}`));
+}
+window.addEventListener("beforeunload", (e) => { if (dirty()) e.preventDefault(); });
+document.addEventListener("keydown", (e) => {
+  if ((e.ctrlKey || e.metaKey) && e.key === "s") { e.preventDefault(); if (!$("save").disabled) $("save").click(); }
+});
+</script>
+</body>
+</html>
