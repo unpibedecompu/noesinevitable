@@ -1,5 +1,28 @@
 # Rapid Grant Application — BlueDot Impact
 
+> **Outcome: Rejected** (response documented 2026-10-03)
+>
+> Hi Lucas Vitali,
+>
+> Thanks for applying for a BlueDot Rapid Grant, and for the thought you put into your application.
+>
+> Unfortunately, your application falls into a category of grants we're not currently able to make. Importantly, this is not a judgment on you or your work. It's about the rules we have to follow as a grantmaker.
+>
+> The categories we can't fund include:
+>
+> - people who hold, or are about to take up, a government role, placement or fellowship
+> - lobbying on specific legislation, or electoral or partisan activity
+> - travel, hospitality or payments for government officials
+> - work done for, or promotion of, BlueDot
+> - applicants under 18
+> - people based in, or activity in, certain countries including Afghanistan, Belarus, Burundi, Central African Republic, Chad, China, Congo Republic, Cuba, Democratic Republic of the Congo, Eritrea, India, Iraq, Iran, Libya, Myanmar, North Korea, Somalia, South Sudan, Sudan, Syria, Russia, Venezuela, Yemen.
+>
+> Best,
+>
+> The BlueDot team
+
+---
+
 Source: https://airtable.com/appMVNtdBtvtJvu5E/pag9G3oF4DYAyassX/form
 
 You are applying for a [Rapid Grant](https://bluedot.org/programs/rapid-grants). If you have any questions, email joshua@bluedot.org.
