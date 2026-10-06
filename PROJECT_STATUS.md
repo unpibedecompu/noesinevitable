@@ -73,17 +73,16 @@
     cuenta** (no 3 como se pensó inicialmente — dato incorrecto de una
     fuente no oficial), y la cuenta `unpibedecompu@gmail.com` ya tiene su
     slot ocupado por `unpibedecompu links` (unpibedecompu.github.io).
-  - Riesgo conocido y aceptado por ahora: tope de **100.000 eventos/mes**
-    en el plan Hobby de Umami (6 meses de retención). Si el sitio se
-    viraliza (el objetivo del proyecto) podría taparse justo en el pico.
-  - Evaluado 2026-09-11: **si se acerca al tope, pasar al plan Pro de
-    Umami ($20/mes, 1M eventos/mes, hasta 20 sitios)** en vez de migrar a
-    Cloudflare Analytics Engine. Analytics Engine hoy es gratis pero
-    requiere que el sitio deje de ser un export estático puro y tenga un
-    Worker con `fetch` handler real que llame `writeDataPoint()` — mucho
-    mayor costo de ingeniería que pagar $20/mes. No hay acción pendiente
-    por ahora, solo vigilar el dashboard de Umami si hay un pico de
-    tráfico.
+  - **Plan Pro de Umami desde 2026-10-06** ($20/mes, 1M eventos/mes, 2
+    años de retención, hasta 20 sitios; período de facturación desde el
+    día 6). Pasado el millón, cada evento extra se cobra $0.00003 (~$30
+    por millón) — ya no se pierden datos en un pico, pero sube el costo.
+    Antes estaba en Hobby (100k eventos/mes, 6 meses de retención).
+  - Evaluado 2026-09-11: Pro de Umami en vez de migrar a Cloudflare
+    Analytics Engine. Analytics Engine hoy es gratis pero requiere que el
+    sitio deje de ser un export estático puro y tenga un Worker con
+    `fetch` handler real que llame `writeDataPoint()` — mucho mayor costo
+    de ingeniería que pagar $20/mes.
 - El hook `trackFunnel` (`lib/analytics.ts`) es vendor-agnostic — dispara a
   `window.umami`, `window.plausible`, `window.gtag` o `window.fathom`, el
   que esté cargado. Hoy solo Umami está cargado.
@@ -172,13 +171,16 @@
       final de `mailContent` (`data/site-copy.json`): dominio pelado, sin
       `https://` ni parámetros, presentado como aviso ("Le escribo a través
       de…") y no como llamado a clickear, para no parecer phishing.
-- [ ] **Alarma por mail cuando se acerque el tope de eventos de Umami**
-      (100k/mes en el plan gratis; ver `strategy/estimated_budget.md`).
-      Avisar a `lucasvitali001@gmail.com` al ~70% y ~90% del cupo, para
-      pasar a Pro antes de perder datos en un pico viral. Primero chequear
-      si Umami Cloud trae alertas de uso propias; si no, un Worker de
-      Cloudflare con cron diario que consulte los eventos del mes por la
-      API de Umami Cloud y mande el mail.
+- [x] **Alarma por mail cuando se acerque el tope de eventos de Umami**
+      Hecha 2026-10-06 en el mismo Worker `workers/cc-counter/`: cron diario
+      (11:00 UTC) que avisa a `lucasvitali001@gmail.com` al 70% y 90% del
+      cupo del plan Pro (1M eventos por período, desde el día 6), para
+      anticipar el cobro de excedente. Umami Cloud no tiene alertas de uso propias ni API de uso, así
+      que el uso se estima con la API de estadísticas (pageviews + eventos
+      + propiedades de eventos — **cada propiedad cuenta como un evento
+      más** en Umami). Si la API falla, avisa por mail (uno por día).
+      Detalle y setup de la API key en `workers/cc-counter/README.md` →
+      "Alarma de Umami".
 - [ ] Reactivar más países en `lib/countries.ts` cuando haya datos
       verificados (ver `DATA_TODO.md`).
 
@@ -188,7 +190,8 @@
       recientes y relevantes sobre riesgos de IA (ControlAI lo ofrece como
       checkbox "Include the latest relevant news in my email").
 - [ ] **Recortar eventos de analytics** para estirar el cupo de Umami
-      (100k eventos/mes gratis; el cupo cuenta eventos, no visitantes).
+      (1M eventos/mes en Pro, después se cobra; el cupo cuenta eventos y
+      cada propiedad de un evento, no visitantes).
       Candidatos a sacar por bajo valor: `step_viewed`, `subject_edited`,
       `body_edited`, `step_back_clicked`. Mantener los del embudo principal
       (`country_selected`, `message_generated`, `email_client_opened`,

@@ -21,15 +21,25 @@
       "destination_address": "lucasvitali001@gmail.com"
     }
   ],
-  // Alarma de cupo: cada 15 minutos suma los mails del día.
+  // Alarmas de cupo: cada 15 minutos suma los mails del día; una vez por día
+  // (11:00 UTC = 8:00 en AR/UY) consulta el uso del mes en Umami. Si se
+  // cambia el segundo, cambiar también `UMAMI_CRON` en src/index.ts.
   "triggers": {
-    "crons": ["*/15 * * * *"]
+    "crons": ["*/15 * * * *", "0 11 * * *"]
   },
   "vars": {
     // 1 fila escrita en D1 por mail → el techo free es ~100k mails/día
     // (100k filas en D1 y 100k ejecuciones de Worker por día).
     "DAILY_LIMIT": "100000",
     "ALERT_FROM": "alertas@noesinevitable.org",
-    "ALERT_TO": "lucasvitali001@gmail.com"
+    "ALERT_TO": "lucasvitali001@gmail.com",
+    // Alarma de Umami. La API key va como secret: `npx wrangler secret put
+    // UMAMI_API_KEY` (sin ella, la alarma de Umami no corre).
+    "UMAMI_WEBSITE_ID": "948684fb-65ac-48d6-bd97-770b72bd8440",
+    // Plan Pro (desde 2026-10-06): 1M eventos por período de facturación;
+    // pasado eso, $0.00003 por evento extra.
+    "UMAMI_MONTHLY_LIMIT": "1000000",
+    // Día del mes en que arranca el período: el Pro se contrató el 6.
+    "UMAMI_BILLING_DAY": "6"
   }
 }

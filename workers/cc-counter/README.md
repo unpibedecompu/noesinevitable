@@ -10,9 +10,14 @@ entrega esa copia a este Worker, que:
   ("responder a todos" de un despacho);
 - descarta el mail: no guarda contenido ni la dirección de quien lo manda.
 
-Aparte, un cron cada 15 minutos suma los mails del día y avisa por mail a
-`lucasvitali001@gmail.com` cuando cruzan el 70% y el 90% de `DAILY_LIMIT`
-(una vez por umbral por día).
+Además manda dos alarmas por mail a `lucasvitali001@gmail.com`, al cruzar el
+70% y el 90% de cada cupo (una vez por umbral y período):
+
+- **Cupo diario de este Worker:** un cron cada 15 minutos suma los mails del
+  día contra `DAILY_LIMIT`.
+- **Cupo mensual de Umami Cloud:** un cron diario (11:00 UTC) estima los
+  eventos del período de facturación contra `UMAMI_MONTHLY_LIMIT`. Ver
+  "Alarma de Umami" más abajo.
 
 Es un Worker aparte del sitio: el `wrangler.jsonc` de la raíz (static assets,
 deploy automático desde Git) no se toca. Éste se deploya a mano.
@@ -74,6 +79,34 @@ Todo desde `workers/cc-counter/`, con la cuenta de Cloudflare dueña de
    antes, cada copia a `registro@` rebota y el usuario recibe un aviso de
    error de entrega.
 
+## Alarma de Umami
+
+Umami Cloud no manda alertas de uso ni tiene API de uso (la página *Settings →
+Usage* es sólo del dashboard). El Worker reconstruye el número como lo cuenta
+Umami — cada pageview y cada evento propio suman 1, y cada propiedad guardada
+de un evento suma 1 más — con tres endpoints de la API de estadísticas:
+`/websites/<id>/stats` (pageviews), `/events/stats` (eventos) y
+`/event-data/stats` (propiedades). La "session data" también cuenta en Umami,
+pero el sitio no la usa. Es una estimación: comparar de vez en cuando con
+*Settings → Usage*.
+
+Setup (una sola vez):
+
+1. En Umami Cloud (cuenta `lucasvitali001@gmail.com`): Settings → API keys →
+   *Create key*.
+2. Guardarla como secret del Worker (pide la clave por consola; no queda en
+   el repo):
+   ```sh
+   npx wrangler secret put UMAMI_API_KEY
+   ```
+3. Chequear en *Settings → Usage* qué día arranca el período de facturación
+   y, si no es el 1, cambiar `UMAMI_BILLING_DAY` en `wrangler.jsonc` y
+   deployar.
+
+Sin `UMAMI_API_KEY` la alarma no corre. Si la API falla (clave vencida o
+revocada, cambio de API), el Worker manda un mail "no pude consultar el uso
+de Umami", a lo sumo uno por día.
+
 ## Consultas
 
 Mails por representante:
@@ -120,3 +153,11 @@ mandar 2 mails como el de arriba y disparar el cron:
 curl "http://localhost:8787/__scheduled?cron=*/15+*+*+*+*"
 ```
 Los mails "enviados" quedan como `.eml` en `.wrangler/tmp/email/`.
+
+La alarma de Umami se prueba contra un mock de la API: levantar un servidor
+que responda `/websites/<id>/stats`, `/events/stats` y `/event-data/stats`, y
+apuntar el Worker ahí con `--var UMAMI_API_KEY:test --var
+UMAMI_API_URL:http://localhost:<puerto>`; después disparar el cron diario:
+```sh
+curl "http://localhost:8787/__scheduled?cron=0+11+*+*+*"
+```

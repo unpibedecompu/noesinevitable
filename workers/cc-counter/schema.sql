@@ -10,9 +10,12 @@ CREATE TABLE IF NOT EXISTS counts (
   PRIMARY KEY (day, email)
 ) WITHOUT ROWID;
 
--- Avisos de cupo ya mandados, para no repetirlos. Sólo se escribe al avisar.
--- `alerted` es un bitmask: 1 = avisó al 70%, 2 = avisó al 90%.
-CREATE TABLE IF NOT EXISTS alerts (
-  day TEXT PRIMARY KEY,
+-- Avisos ya mandados, para no repetirlos. Sólo se escribe al avisar.
+-- `key` es la alarma + su período: `cc:<día>`, `umami:<inicio del período>`,
+-- `umami-error:<día>`. `alerted` es un bitmask: 1 = avisó al 70% (o el aviso
+-- de error), 2 = avisó al 90%. (Reemplaza a la tabla `alerts` de la primera
+-- versión, que quedó sin uso en la base remota.)
+CREATE TABLE IF NOT EXISTS notices (
+  key TEXT PRIMARY KEY,
   alerted INTEGER NOT NULL DEFAULT 0
 ) WITHOUT ROWID;
