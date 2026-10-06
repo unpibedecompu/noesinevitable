@@ -138,11 +138,16 @@
         orientativos, no auditables.
       - Pendiente: no hay política de privacidad en el sitio; cuando se
         escriba, mencionar el CC.
-- [ ] **Revisar los datos que se le piden al usuario** para el mail. Hoy es
-      sólo nombre (+ provincia para filtrar). Evaluar pedir código postal,
-      ciudad u otro dato que haga el mail más creíble como "constituyente"
-      real del representante (ControlAI pide dirección / código postal),
-      sin romper el objetivo de completar en 10-20 segundos.
+- [x] **Revisar los datos que se le piden al usuario** para el mail
+      (decisión del dueño, 2026-10-06). Se pide nombre, provincia/departamento
+      y, opcional, **sexo** (Femenino / Masculino): cambia "ciudadano/a" por
+      "ciudadana" / "ciudadano" en la primera oración (placeholder
+      `{{ciudadano}}` en `mailContent`); sin elegir queda "ciudadano/a". No
+      se manda a analytics. **Descartados:** código postal (los
+      representantes de AR/UY se eligen por provincia/departamento entero,
+      no cambia el destinatario y nadie lo chequea), DNI/cédula y dirección
+      (riesgo de privacidad, parece phishing, ningún despacho lo necesita),
+      ciudad y frase personal (el dueño prefirió no sumarlas).
 - [x] **Mails personalizados por representante** (AR + UY, 2026-09-30).
       `lib/message-template.ts` arma, al abrir cada mail:
       - Saludo con título y género: "Estimada Diputada {nombre}:" /

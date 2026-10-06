@@ -20,6 +20,8 @@ export interface BodyContext {
   regionName: string | null;
   /** `CountryConfig.regionLabel` del país ("Provincia", "Departamento"…). */
   regionLabel: string;
+  /** Sexo que eligió el usuario (opcional): "ciudadana" / "ciudadano" / "ciudadano/a". */
+  userGender?: Gender | null;
 }
 
 /**
@@ -44,7 +46,7 @@ const REGION_PREFIX: Record<string, string> = {
 /**
  * Cuerpo del mensaje, sin el saludo (el usuario ve y edita esto).
  * `{{lugar}}` va en la primera oración ("le escribo como ciudadano/a de la
- * provincia de Córdoba, Argentina"): es lo que identifica al remitente como
+ * provincia de Córdoba, Argentina"; `{{ciudadano}}` según el sexo elegido): es lo que identifica al remitente como
  * representado/a del destinatario, como el "I am writing as a constituent"
  * de la plantilla de ControlAI. Incluye la preposición ("de la…", "del…").
  */
@@ -52,6 +54,7 @@ export function buildBody(ctx: BodyContext): string {
   const name = ctx.userName || "[tu nombre]";
   return siteCopy.mailContent
     .replaceAll("{{nombre}}", name)
+    .replaceAll("{{ciudadano}}", pick(ctx.userGender ?? undefined, ["ciudadana", "ciudadano", "ciudadano/a"]))
     .replaceAll("{{lugar}}", placeFor(ctx))
     .replaceAll("{{pais}}", ctx.countryName);
 }

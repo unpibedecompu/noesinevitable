@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { CountryConfig, Representative } from "@/lib/types";
+import type { CountryConfig, Gender, Representative } from "@/lib/types";
 import { OFFICE_LABELS, COUNTRY_CODES } from "@/lib/countries";
 import { SUBJECT, buildBody, fullBody } from "@/lib/message-template";
 import {
@@ -32,6 +32,12 @@ const OFFICE_ORDER: Record<string, number> = {
 
 const REPO_URL =
   "https://github.com/fourofclubs001/unpibedecompu/tree/master/strategy/contacta_representante_latam";
+
+/** Opciones de sexo del remitente; sin elegir, el mail dice "ciudadano/a". */
+const GENDER_OPTIONS: [Gender, string][] = [
+  ["f", "Femenino"],
+  ["m", "Masculino"],
+];
 
 const CHIP_CLS =
   "rounded-full bg-accent px-3 py-1.5 text-sm font-semibold text-ink transition hover:bg-accent-dark";
@@ -87,6 +93,7 @@ export default function ContactForm({ countries, representatives }: Props) {
   );
   const [region, setRegion] = useState<string | null>(null);
   const [name, setName] = useState("");
+  const [gender, setGender] = useState<Gender | null>(null);
 
   const [subject, setSubject] = useState(SUBJECT);
   const [body, setBody] = useState("");
@@ -160,7 +167,7 @@ export default function ContactForm({ countries, representatives }: Props) {
     e.preventDefault();
     if (!country || !name.trim() || matches.length === 0) return;
     setSubject(SUBJECT);
-    if (!bodyEdited) setBody(buildBody({ userName: name.trim(), countryName: country.name, regionName: region, regionLabel: country.regionLabel }));
+    if (!bodyEdited) setBody(buildBody({ userName: name.trim(), userGender: gender, countryName: country.name, regionName: region, regionLabel: country.regionLabel }));
     setLastSent(null);
     setStep(2);
     trackFunnel("message_generated", {
@@ -300,6 +307,30 @@ export default function ContactForm({ countries, representatives }: Props) {
             placeholder="Nombre y apellido"
             className="w-full rounded-lg border border-ink/15 bg-white px-3 py-2"
           />
+        </div>
+
+        <div className="mt-5">
+          <span className="mb-2 block text-sm font-semibold">
+            Sexo <span className="text-ink/40">(opcional)</span>
+          </span>
+          {/* Sólo cambia "ciudadano/a" en el mail; no se manda a analytics. */}
+          <div className="flex flex-wrap gap-2">
+            {GENDER_OPTIONS.map(([value, label]) => (
+              <button
+                key={value}
+                type="button"
+                aria-pressed={gender === value}
+                onClick={() => setGender(gender === value ? null : value)}
+                className={`rounded-full px-3 py-1.5 text-sm transition ${
+                  gender === value
+                    ? "bg-accent font-semibold text-ink"
+                    : "bg-ink/5 text-ink/70 hover:bg-ink/10"
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
         </div>
 
         {country && matches.length === 0 && (
