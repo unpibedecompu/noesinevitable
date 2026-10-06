@@ -156,7 +156,8 @@ export default function ParticipationDonuts({
       </div>
 
       {/* Columnas: personas centrada bajo su donut (centro al 25%), el nombre
-          en el medio y mails bajo el suyo (centro al 75%). */}
+          en el medio y mails bajo el suyo (centro al 75%). El pr-2/pl-2
+          compensa los 4px que el gap-4 de los donuts corre cada centro. */}
       <table className="mt-6 w-full table-fixed text-sm">
         <colgroup>
           <col className="w-[14%]" />
@@ -168,31 +169,31 @@ export default function ParticipationDonuts({
         <thead>
           <tr className="border-b border-ink/10 text-xs uppercase tracking-wide text-ink/50">
             <th aria-hidden="true" />
-            <th className="py-2 text-center font-semibold">Personas</th>
+            <th className="py-2 pr-2 text-center font-semibold">Personas</th>
             <th className="py-2 text-center font-semibold">{country ? country.regionLabel : "País"}</th>
-            <th className="py-2 text-center font-semibold">Mails</th>
+            <th className="py-2 pl-2 text-center font-semibold">Mails</th>
             <th aria-hidden="true" />
           </tr>
         </thead>
         <tbody className="tabular-nums">
           <tr className="border-b border-ink/10 font-semibold">
             <td />
-            <td className="py-2 text-center">{fmt(totalPeople)}</td>
+            <td className="py-2 pr-2 text-center">{fmt(totalPeople)}</td>
             <td className="py-2 text-center">{country ? `Total ${country.name}` : "Total"}</td>
-            <td className="py-2 text-center">{fmt(totalMails)}</td>
+            <td className="py-2 pl-2 text-center">{fmt(totalMails)}</td>
             <td />
           </tr>
           {rows.map((r) => (
             <tr key={r.key} className="border-b border-ink/5 last:border-0">
               <td />
-              <td className="py-2 text-center text-ink/80">{fmt(r.people)}</td>
+              <td className="py-2 pr-2 text-center text-ink/80">{fmt(r.people)}</td>
               <td className="py-2">
                 <span className="flex items-center justify-center gap-2 text-center">
                   <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: r.color }} aria-hidden="true" />
                   <span className="text-ink/80">{r.name}</span>
                 </span>
               </td>
-              <td className="py-2 text-center text-ink/80">{fmt(r.mails)}</td>
+              <td className="py-2 pl-2 text-center text-ink/80">{fmt(r.mails)}</td>
               <td />
             </tr>
           ))}
