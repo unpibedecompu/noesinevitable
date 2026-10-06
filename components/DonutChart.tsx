@@ -72,7 +72,7 @@ export default function DonutChart({ slices, total, unit }: Props) {
           transform={`rotate(-90 ${CENTER} ${CENTER})`}
         >
           <title>
-            {arc.name}: {fmt(arc.count)} {label(arc.count)}
+            {`${arc.name}: ${fmt(arc.count)} ${label(arc.count)}`}
           </title>
         </circle>
       ))}
