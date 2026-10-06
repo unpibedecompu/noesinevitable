@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { COUNTRIES } from "@/lib/countries";
-import { fetchLiveCounts, withBaseline } from "@/lib/mail-stats";
+import { fetchLiveStats, withBaseline, type CountryCount } from "@/lib/mail-stats";
 import DonutChart from "@/components/DonutChart";
 
 // Paleta categórica (2 slots) validada con scripts/validate_palette.js del
@@ -17,23 +17,52 @@ const SLICE_COLORS: Record<string, string> = {
 const fmt = (n: number) => n.toLocaleString("es-AR");
 
 /**
- * Mails enviados por país: arranca con la base de antes del conteo por CC
- * (sale en el HTML estático) y se actualiza con los totales en vivo del
- * Worker. Si el Worker no responde, queda la base.
+ * Personas y mails enviados por país, en dos donuts. Arranca con la base de
+ * antes del conteo automático (sale en el HTML estático) y se actualiza con
+ * los totales en vivo del Worker. Si el Worker no responde, queda la base.
  */
 export default function MailStatsChart() {
-  const [counts, setCounts] = useState(() => withBaseline());
+  const [stats, setStats] = useState(() => withBaseline());
 
   useEffect(() => {
     let cancelled = false;
-    fetchLiveCounts().then((live) => {
-      if (live && !cancelled) setCounts(withBaseline(live));
+    fetchLiveStats().then((live) => {
+      if (live && !cancelled) setStats(withBaseline(live));
     });
     return () => {
       cancelled = true;
     };
   }, []);
 
+  return (
+    <div className="mt-4 grid gap-8 sm:grid-cols-2 sm:gap-4">
+      <Donut
+        title="Personas"
+        counts={stats.people}
+        center={["persona", "personas"]}
+        legend={["persona", "personas"]}
+      />
+      <Donut
+        title="Mails enviados"
+        counts={stats.mails}
+        center={["mail enviado", "mails enviados"]}
+        legend={["mail", "mails"]}
+      />
+    </div>
+  );
+}
+
+function Donut({
+  title,
+  counts,
+  center,
+  legend,
+}: {
+  title: string;
+  counts: CountryCount[];
+  center: [string, string];
+  legend: [string, string];
+}) {
   const total = counts.reduce((sum, c) => sum + c.count, 0);
   const slices = counts
     .map((c) => ({
@@ -45,14 +74,12 @@ export default function MailStatsChart() {
     .sort((a, b) => b.count - a.count);
 
   return (
-    <>
-      <div className="mt-4">
-        <DonutChart slices={slices} total={total} />
-      </div>
-
-      <ul className="mx-auto mt-4 flex max-w-xs flex-col gap-1.5">
+    <figure className="min-w-0">
+      <figcaption className="mb-2 text-center text-sm font-semibold text-ink/70">{title}</figcaption>
+      <DonutChart slices={slices} total={total} unit={center} />
+      <ul className="mx-auto mt-4 flex max-w-[14rem] flex-col gap-1.5">
         {slices.map((s) => (
-          <li key={s.code} className="flex items-center justify-between text-sm">
+          <li key={s.code} className="flex items-center justify-between gap-3 text-sm">
             <span className="flex items-center gap-2">
               <span
                 className="h-2.5 w-2.5 rounded-full"
@@ -62,11 +89,11 @@ export default function MailStatsChart() {
               <span className="text-ink/80">{s.name}</span>
             </span>
             <span className="font-semibold text-ink">
-              {fmt(s.count)} {s.count === 1 ? "mail" : "mails"}
+              {fmt(s.count)} {s.count === 1 ? legend[0] : legend[1]}
             </span>
           </li>
         ))}
       </ul>
-    </>
+    </figure>
   );
 }

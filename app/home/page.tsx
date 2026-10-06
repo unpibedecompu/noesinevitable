@@ -33,7 +33,7 @@ export default function HomePage() {
 
       <section className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-ink/5 sm:p-6">
         <h2 className="text-sm font-semibold uppercase tracking-wide text-ink/50">
-          Mails enviados a representantes, por país
+          Participación, por país
         </h2>
 
         <MailStatsChart />

@@ -9,9 +9,12 @@
  *      del día en D1 — una sola fila escrita por mail,
  *   3. descarta el mail — no se guarda contenido ni direcciones del remitente.
  *
- * Totales públicos: el cron de 15 minutos guarda los mails por país en una
- * sola fila de D1, y `GET /stats` devuelve esa fila (la usa /home del sitio).
- * Así cada visita lee 1 fila, no toda la tabla.
+ * Personas: el sitio hace `POST /people` (sólo el código de país) la primera
+ * vez que alguien aprieta "Enviar" en ese navegador; se suma 1 por país y día.
+ *
+ * Totales públicos: el cron de 15 minutos guarda mails y personas por país en
+ * una sola fila de D1, y `GET /stats` devuelve esa fila (la usa /home del
+ * sitio). Así cada visita lee 1 fila, no las tablas enteras.
  *
  * Alarmas por mail a `ALERT_TO`, al cruzar el 70% y el 90% de cada cupo (una
  * vez por umbral y período):
@@ -99,64 +102,93 @@ export default {
     }
   },
 
-  /** `GET /stats`: mails por país, sólo totales (nada personal). */
+  /**
+   * `GET /stats`: totales públicos de mails y personas por país (nada
+   * personal). `POST /people`: el sitio avisa, una sola vez por navegador,
+   * que alguien apretó "Enviar"; el cuerpo es sólo el código de país.
+   */
   async fetch(request: Request, env: Env): Promise<Response> {
     const { pathname } = new URL(request.url);
     if (request.method === "OPTIONS") return new Response(null, { headers: CORS });
-    if (pathname !== "/stats" || request.method !== "GET") {
-      return new Response("Not found", { status: 404, headers: CORS });
+    if (pathname === "/stats" && request.method === "GET") {
+      const row = await env.DB.prepare(`SELECT value FROM stats WHERE key = 'public'`)
+        .first<{ value: string }>();
+      return new Response(row?.value ?? JSON.stringify({ updatedAt: null, mails: [], people: [] }), {
+        headers: {
+          ...CORS,
+          "Content-Type": "application/json; charset=utf-8",
+          "Cache-Control": "public, max-age=300",
+        },
+      });
     }
-    const row = await env.DB.prepare(`SELECT value FROM stats WHERE key = 'public'`)
-      .first<{ value: string }>();
-    return new Response(row?.value ?? JSON.stringify({ updatedAt: null, byCountry: [] }), {
-      headers: {
-        ...CORS,
-        "Content-Type": "application/json; charset=utf-8",
-        "Cache-Control": "public, max-age=300",
-      },
-    });
+    if (pathname === "/people" && request.method === "POST") {
+      const country = (await request.text()).trim().toUpperCase();
+      if (!COUNTRIES.has(country)) {
+        return new Response("Unknown country", { status: 400, headers: CORS });
+      }
+      await env.DB.prepare(
+        `INSERT INTO people (day, country, n) VALUES (?1, ?2, 1)
+         ON CONFLICT(day, country) DO UPDATE SET n = n + 1`,
+      )
+        .bind(today(), country)
+        .run();
+      return new Response(null, { status: 204, headers: CORS });
+    }
+    return new Response("Not found", { status: 404, headers: CORS });
   },
 };
 
-/** Los totales son públicos: cualquier origen puede leerlos. */
+/** Los totales son públicos: cualquier origen puede leerlos (y sumar personas). */
 const CORS = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "GET, OPTIONS",
+  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
 };
 
-type CountryCount = { code: string; count: number };
+/** Países con representantes cargados: los únicos que acepta `POST /people`. */
+const COUNTRIES = new Set(REPS.values());
 
-async function sumByCountry(env: Env, where: string, day: string): Promise<CountryCount[]> {
-  const { results } = await env.DB.prepare(
-    `SELECT country AS code, SUM(sent) AS count FROM counts WHERE ${where} GROUP BY country`,
-  )
-    .bind(day)
-    .all<CountryCount>();
-  return results;
+type CountryCount = { code: string; count: number };
+type Totals = { mails: CountryCount[]; people: CountryCount[] };
+
+/** Mails (`counts`) y personas (`people`) por país, en los días que cumplen `where`. */
+async function sumByCountry(env: Env, where: string, day: string): Promise<Totals> {
+  const [mails, people] = await env.DB.batch<CountryCount>([
+    env.DB.prepare(
+      `SELECT country AS code, SUM(sent) AS count FROM counts WHERE ${where} GROUP BY country`,
+    ).bind(day),
+    env.DB.prepare(
+      `SELECT country AS code, SUM(n) AS count FROM people WHERE ${where} GROUP BY country`,
+    ).bind(day),
+  ]);
+  return { mails: mails.results, people: people.results };
+}
+
+function addCounts(...lists: CountryCount[][]): CountryCount[] {
+  const totals = new Map<string, number>();
+  for (const { code, count } of lists.flat()) totals.set(code, (totals.get(code) ?? 0) + count);
+  return [...totals].map(([code, count]) => ({ code, count }));
 }
 
 /**
- * Recalcula los totales públicos (`stats` → 'public'). Para no leer toda la
- * tabla cada 15 minutos, los días anteriores a hoy se suman una vez por día
- * y quedan guardados en `stats` → 'past'; cada corrida suma sólo las filas
- * de hoy.
+ * Recalcula los totales públicos (`stats` → 'public'). Para no leer las
+ * tablas enteras cada 15 minutos, los días anteriores a hoy se suman una vez
+ * por día y quedan guardados en `stats` → 'past'; cada corrida suma sólo las
+ * filas de hoy.
  */
 async function updatePublicStats(env: Env): Promise<void> {
   const day = today();
   const pastRow = await env.DB.prepare(`SELECT value FROM stats WHERE key = 'past'`)
     .first<{ value: string }>();
-  let past = pastRow ? (JSON.parse(pastRow.value) as { through: string; byCountry: CountryCount[] }) : null;
-  if (!past || past.through !== day) {
-    past = { through: day, byCountry: await sumByCountry(env, "day < ?1", day) };
+  let past = pastRow ? (JSON.parse(pastRow.value) as Partial<Totals> & { through: string }) : null;
+  if (!past || past.through !== day || !past.mails || !past.people) {
+    past = { through: day, ...(await sumByCountry(env, "day < ?1", day)) };
     await putStat(env, "past", past);
   }
-  const totals = new Map<string, number>();
-  for (const { code, count } of [...past.byCountry, ...(await sumByCountry(env, "day = ?1", day))]) {
-    totals.set(code, (totals.get(code) ?? 0) + count);
-  }
+  const current = await sumByCountry(env, "day = ?1", day);
   await putStat(env, "public", {
     updatedAt: new Date().toISOString(),
-    byCountry: [...totals].map(([code, count]) => ({ code, count })),
+    mails: addCounts(past.mails!, current.mails),
+    people: addCounts(past.people!, current.people),
   });
 }
 

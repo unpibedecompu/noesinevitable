@@ -16,6 +16,7 @@ import {
   TRACKING_CC,
 } from "@/lib/mailto";
 import { trackFunnel } from "@/lib/analytics";
+import { recordPerson } from "@/lib/mail-stats";
 import { SHARE_URL, SHARE_TEXT } from "@/lib/share";
 import CoursesSection from "@/components/CoursesSection";
 import FollowSection from "@/components/FollowSection";
@@ -183,6 +184,9 @@ export default function ContactForm({ countries, representatives }: Props) {
     setLastSent(rep);
     setOpenedKeys((prev) => new Set(prev).add(repKey(rep)));
     setConfirmedSent(false);
+    // Primera vez que este navegador aprieta "Enviar": cuenta como una
+    // persona en /home (sólo se manda el código de país).
+    recordPerson(rep.country);
     trackFunnel("email_client_opened", {
       country: countryCode ?? "?",
       office: rep.office,

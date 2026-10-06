@@ -27,3 +27,13 @@ CREATE TABLE IF NOT EXISTS stats (
   key TEXT PRIMARY KEY,
   value TEXT NOT NULL
 ) WITHOUT ROWID;
+
+-- Personas por país y día (UTC): el sitio suma 1 la primera vez que alguien
+-- aprieta "Enviar" en un navegador (POST /people). Upsert: 1 fila escrita
+-- por persona. No se guarda nada que identifique a nadie.
+CREATE TABLE IF NOT EXISTS people (
+  day TEXT NOT NULL,
+  country TEXT NOT NULL,
+  n INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY (day, country)
+) WITHOUT ROWID;

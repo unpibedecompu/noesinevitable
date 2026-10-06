@@ -209,10 +209,15 @@
       (`country_selected`, `message_generated`, `email_client_opened`,
       `email_sent_confirmed`, `shared`, `course_clicked`).
 - [x] **Automatizar la visualización de /home** (2026-10-06). El gráfico
-      muestra **mails enviados** por país, en vivo: el Worker
+      muestra dos donuts en vivo, por país: **personas** (navegadores donde
+      alguien apretó "Enviar" al menos una vez: `recordPerson` hace
+      `POST /people` con sólo el código de país y marca el navegador en
+      localStorage) y **mails enviados** (copias a registro@). El Worker
       `workers/cc-counter` recalcula los totales cada 15 minutos y los
-      publica en `GET /stats` (sólo totales por país); /home los pide al
-      abrir (`components/MailStatsChart.tsx`). Se suma una base fija con los
-      mails de antes del conteo por CC (`data/mail-sent-stats.json`: 57
-      según Umami, repartidos 52 AR / 5 UY según los remitentes de cada
-      país). Si el Worker no responde, se ve sólo la base.
+      publica en `GET /stats`; /home los pide al abrir
+      (`components/MailStatsChart.tsx`). Se suma una base fija con la
+      participación de antes del conteo automático
+      (`data/mail-sent-stats.json`: 11 personas y 57 mails según Umami). Si
+      el Worker no responde, se ve sólo la base. Aproximado: una persona en
+      dos dispositivos, o que borra los datos del navegador, cuenta dos
+      veces, y cualquiera podría inflar los números a mano.

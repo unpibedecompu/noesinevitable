@@ -82,11 +82,16 @@ Todo desde `workers/cc-counter/`, con la cuenta de Cloudflare dueña de
 ## Totales públicos (`GET /stats`)
 
 `https://noesinevitable-cc-counter.unpibedecompu.workers.dev/stats` devuelve
-los mails contados por país (`{ updatedAt, byCountry: [{ code, count }] }`),
-sin nada personal y con CORS abierto. Lo usa el gráfico de /home
+mails y personas por país (`{ updatedAt, mails: [{ code, count }], people:
+[…] }`), sin nada personal y con CORS abierto. Lo usan los gráficos de /home
 (`lib/mail-stats.ts`).
 
-Para no leer toda la tabla `counts` en cada visita, el cron de 15 minutos
+**Personas:** el sitio hace `POST /people` con el código de país como único
+contenido la primera vez que alguien aprieta "Enviar" en un navegador
+(`recordPerson`); se suma 1 en la tabla `people` por país y día. Acepta sólo
+países con representantes cargados.
+
+Para no leer las tablas enteras en cada visita, el cron de 15 minutos
 guarda el resultado en la tabla `stats` (fila `public`) y `/stats` lee sólo
 esa fila. Los días anteriores se suman una vez por día (fila `past`); cada
 corrida suma sólo las filas de hoy. Los números pueden tener hasta 15
