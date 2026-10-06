@@ -142,9 +142,9 @@
       (decisión del dueño, 2026-10-06). Se pide nombre, provincia/departamento
       y **sexo** (Femenino / Masculino / Otro): cambia "ciudadano/a" por
       "ciudadana" / "ciudadano" en la primera oración (placeholder
-      `{{ciudadano}}` en `mailContent`); con "Otro" o sin elegir queda
-      "ciudadano/a" (no es obligatorio para generar el mensaje). No se manda
-      a analytics. **Descartados:** código postal (los
+      `{{ciudadano}}` en `mailContent`); con "Otro" queda "ciudadano/a". Es
+      obligatorio: "Generar mi mensaje" queda deshabilitado hasta elegir.
+      No se manda a analytics. **Descartados:** código postal (los
       representantes de AR/UY se eligen por provincia/departamento entero,
       no cambia el destinatario y nadie lo chequea), DNI/cédula y dirección
       (riesgo de privacidad, parece phishing, ningún despacho lo necesita),

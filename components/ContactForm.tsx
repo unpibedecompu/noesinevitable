@@ -33,7 +33,7 @@ const OFFICE_ORDER: Record<string, number> = {
 const REPO_URL =
   "https://github.com/fourofclubs001/unpibedecompu/tree/master/strategy/contacta_representante_latam";
 
-/** Sexo del remitente: "Otro" (o no elegir) deja "ciudadano/a" en el mail. */
+/** Sexo del remitente (obligatorio): "Otro" deja "ciudadano/a" en el mail. */
 type SenderGender = Gender | "otro";
 const GENDER_OPTIONS: [SenderGender, string][] = [
   ["f", "Femenino"],
@@ -167,7 +167,7 @@ export default function ContactForm({ countries, representatives }: Props) {
 
   function handleGenerate(e: React.FormEvent) {
     e.preventDefault();
-    if (!country || !name.trim() || matches.length === 0) return;
+    if (!country || !name.trim() || !gender || matches.length === 0) return;
     setSubject(SUBJECT);
     if (!bodyEdited) setBody(buildBody({ userName: name.trim(), userGender: gender === "otro" ? null : gender, countryName: country.name, regionName: region, regionLabel: country.regionLabel }));
     setLastSent(null);
@@ -343,7 +343,7 @@ export default function ContactForm({ countries, representatives }: Props) {
 
         <button
           type="submit"
-          disabled={!country || !name.trim() || matches.length === 0}
+          disabled={!country || !name.trim() || !gender || matches.length === 0}
           className="mt-6 w-full rounded-full bg-accent px-4 py-3 font-semibold text-ink transition hover:bg-accent-dark disabled:cursor-not-allowed disabled:opacity-40"
         >
           Generar mi mensaje
