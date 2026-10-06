@@ -101,10 +101,9 @@
 
 ## Próximos pasos
 
-- [ ] **Dirección de tracking en CC** (`registro@noesinevitable.org`) para
-      contar envíos reales y no sólo clicks. **Código hecho (2026-10-06,
-      rama `feature/cc-tracking`); falta el setup en Cloudflare** — pasos en
-      `workers/cc-counter/README.md`.
+- [x] **Dirección de tracking en CC** (`registro@noesinevitable.org`) para
+      contar envíos reales y no sólo clicks. **En producción desde
+      2026-10-06.** Setup y consultas en `workers/cc-counter/README.md`.
       - Hecho: Email Worker `workers/cc-counter/` (separado del sitio; el
         `wrangler.jsonc` de la raíz no se tocó). Lee sólo el header `To`, lo
         matchea contra `representatives.json`, suma 1 en D1 por
@@ -123,8 +122,10 @@
         por mail): puede llegar hasta 15 min tarde, y no cuenta los mails
         ignorados, que igual gastan ejecuciones.
       - Hecho en Cloudflare (2026-10-06): Email Routing activado (MX
-        configurados), `lucasvitali001@gmail.com` verificado como destino y
-        base D1 `noesinevitable-cc-counter` creada.
+        configurados), `lucasvitali001@gmail.com` verificado como destino,
+        base D1 `noesinevitable-cc-counter` creada, Worker deployado y
+        `registro@` ruteado al Worker. Probado con un mail real
+        (`wrangler tail` mostró el evento `Email … Ok`).
       - Hecho: `cc` en todos los links de `lib/mailto.ts` (Gmail web,
         Outlook web, `mailto:`, deep links iOS/Android) vía `TRACKING_CC`, y
         una línea en el paso 3 explicando la copia. **Falta probar los deep

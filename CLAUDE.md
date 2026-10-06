@@ -17,12 +17,12 @@ Leer primero `PROJECT_STATUS.md` (deploy, tareas pendientes), `DATA_TODO.md`
 - Antes de commitear cambios de datos: `npm run check:data`. Para tipos:
   `npx tsc --noEmit -p .`.
 
-## Estado (2026-09-30)
+## Estado (2026-10-06)
 
-- Rama `feature/personalized-salutation` pusheada, **sin mergear**: alcance
-  limitado a Argentina + Uruguay (se borraron los datos del resto), saludo con
-  título y género ("Estimada Diputada …:"), y "ciudadano/a de la provincia de
-  …" en la primera oración. Detalle en `PROJECT_STATUS.md` → "Mails
-  personalizados por representante".
+- Mergeado a `master`: mails personalizados por representante (alcance AR +
+  UY) y dirección de tracking en CC (`registro@noesinevitable.org` → Worker
+  `workers/cc-counter/`, deployado a mano, aparte del sitio). **Si cambia
+  `data/representatives.json`, volver a deployar ese Worker** (`npm run
+  deploy` en `workers/cc-counter/`) o los mails nuevos no se cuentan.
 - Próximas tareas sugeridas (ver `PROJECT_STATUS.md` → "Próximos pasos"):
-  dirección de tracking en CC (Email Worker + D1) y alarma por cupo de Umami.
+  alarma por cupo de Umami y revisar los datos que se le piden al usuario.
