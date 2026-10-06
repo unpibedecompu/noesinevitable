@@ -1,6 +1,6 @@
 import Link from "next/link";
 import siteCopy from "@/data/site-copy.json";
-import MailStatsChart from "@/components/MailStatsChart";
+import ParticipationStats from "@/components/ParticipationStats";
 import CoursesSection from "@/components/CoursesSection";
 import FollowSection from "@/components/FollowSection";
 
@@ -30,10 +30,10 @@ export default function HomePage() {
 
       <section className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-ink/5 sm:p-6">
         <h2 className="text-sm font-semibold uppercase tracking-wide text-ink/50">
-          Participación, por país
+          Participación
         </h2>
 
-        <MailStatsChart />
+        <ParticipationStats />
       </section>
 
       <div className="mt-8 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-ink/5 sm:p-6">
