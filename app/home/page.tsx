@@ -16,12 +16,9 @@ export default function HomePage() {
         </h1>
         <p className="mt-3 text-base text-ink/70">{siteCopy.explanation}</p>
         <p className="mt-3 text-base text-ink/70">
-          {siteCopy.pageTitle} te ayuda a escribirle en menos de un minuto a
-          tus representantes políticos, pidiéndoles que traten los riesgos
-          del desarrollo acelerado de la inteligencia artificial como una
-          prioridad. Elegís tu país, generamos el mensaje y lo abrís directo
-          en tu cliente de mail — no mandamos nada por vos ni guardamos tus
-          datos.
+          {siteCopy.pageTitle} te ayuda a escribirle a tus representantes
+          políticos, pidiéndoles que traten los riesgos del desarrollo
+          acelerado de la inteligencia artificial como una prioridad.
         </p>
         <Link
           href="/"
