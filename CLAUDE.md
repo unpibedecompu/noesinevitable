@@ -24,5 +24,7 @@ Leer primero `PROJECT_STATUS.md` (deploy, tareas pendientes), `DATA_TODO.md`
   `workers/cc-counter/`, deployado a mano, aparte del sitio). **Si cambia
   `data/representatives.json`, volver a deployar ese Worker** (`npm run
   deploy` en `workers/cc-counter/`) o los mails nuevos no se cuentan.
+- El mismo Worker manda las alarmas de cupo (mails/día y eventos/mes de
+  Umami). La de Umami necesita el secret `UMAMI_API_KEY` (ver su README).
 - Próximas tareas sugeridas (ver `PROJECT_STATUS.md` → "Próximos pasos"):
-  alarma por cupo de Umami y revisar los datos que se le piden al usuario.
+  revisar los datos que se le piden al usuario.

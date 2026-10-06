@@ -172,13 +172,16 @@
       final de `mailContent` (`data/site-copy.json`): dominio pelado, sin
       `https://` ni parámetros, presentado como aviso ("Le escribo a través
       de…") y no como llamado a clickear, para no parecer phishing.
-- [ ] **Alarma por mail cuando se acerque el tope de eventos de Umami**
+- [x] **Alarma por mail cuando se acerque el tope de eventos de Umami**
       (100k/mes en el plan gratis; ver `strategy/estimated_budget.md`).
-      Avisar a `lucasvitali001@gmail.com` al ~70% y ~90% del cupo, para
-      pasar a Pro antes de perder datos en un pico viral. Primero chequear
-      si Umami Cloud trae alertas de uso propias; si no, un Worker de
-      Cloudflare con cron diario que consulte los eventos del mes por la
-      API de Umami Cloud y mande el mail.
+      Hecha 2026-10-06 en el mismo Worker `workers/cc-counter/`: cron diario
+      (11:00 UTC) que avisa a `lucasvitali001@gmail.com` al 70% y 90% del
+      cupo. Umami Cloud no tiene alertas de uso propias ni API de uso, así
+      que el uso se estima con la API de estadísticas (pageviews + eventos
+      + propiedades de eventos — **cada propiedad cuenta como un evento
+      más** en Umami). Si la API falla, avisa por mail (uno por día).
+      Detalle y setup de la API key en `workers/cc-counter/README.md` →
+      "Alarma de Umami".
 - [ ] Reactivar más países en `lib/countries.ts` cuando haya datos
       verificados (ver `DATA_TODO.md`).
 
