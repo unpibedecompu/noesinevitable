@@ -58,7 +58,8 @@ export default function Page() {
         <p>
           El mail se abre en tu propio cliente de correo (Gmail, Outlook,
           la app de tu celular). No mandamos nada por vos y no guardamos tus
-          datos. Sólo contamos cuántas personas llegan a la pantalla de envío.
+          datos. Sólo contamos cuántos mails se mandan, con una copia a
+          registro@noesinevitable.org.
         </p>
         <p className="mt-2">
           <Link href="/home" className="font-semibold text-accent-dark underline">
