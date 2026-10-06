@@ -44,7 +44,7 @@ legis.senado.leg.br) están documentadas en la tabla de Fase 2.
 ### Bloqueante
 - [ ] **México: re-verificar desde una IP mexicana.** Las 163 filas MX salieron de capturas de Wayback porque los sitios `.gob.mx` bloquean este entorno. Abrir ~10 direcciones por cámara en un browser normal desde México y, si están bien, poner `verified: true`. El JSON del Senado (`senado.gob.mx/66/datosAbiertos/senadoresDatosAb.json`) es la fuente más confiable.
 - [ ] **AR senadores + CO representantes: spot-check de los datos masivos.** Los 72 senadores AR y los 182 representantes CO se extrajeron de listados oficiales pero sólo se cross-checearon 3 y 5 respectivamente. Chequear ~10 más por cámara contra la ficha individual antes de un envío masivo. Ojo con los irregulares (sin punto, apellido compuesto). Los 257 diputados AR sí salieron uno por uno del `mailto:` de cada ficha oficial (patrón `<slug>@hcdn.gob.ar` sin excepciones).
-- [ ] **Texto del mensaje** (`lib/message-template.ts`) — sigue siendo borrador, falta aprobación del dueño.
+- [x] **Texto del mensaje** (`data/site-copy.json` → `mailContent`) — aprobado por el dueño el 2026-10-06.
 
 ### Completar cobertura
 - [x] AR: 257 diputados individuales — hecho.

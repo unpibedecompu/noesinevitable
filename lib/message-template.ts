@@ -1,6 +1,6 @@
 /**
- * BORRADOR — pendiente de revisión y aprobación del dueño del proyecto antes de lanzar.
- * (ver PROJECT_SPEC.md → "Plantilla de mensaje pre-escrito")
+ * Texto aprobado por el dueño del proyecto el 2026-10-06
+ * (ver PROJECT_SPEC.md → "Plantilla de mensaje pre-escrito").
  *
  * El usuario edita el cuerpo (sin saludo) en un textarea. El saludo de cada
  * representante se agrega al abrir el mail, así el mismo texto sirve para
