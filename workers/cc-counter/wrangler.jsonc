@@ -36,9 +36,10 @@
     // Alarma de Umami. La API key va como secret: `npx wrangler secret put
     // UMAMI_API_KEY` (sin ella, la alarma de Umami no corre).
     "UMAMI_WEBSITE_ID": "948684fb-65ac-48d6-bd97-770b72bd8440",
-    // Plan Hobby: 100k eventos por período de facturación.
-    "UMAMI_MONTHLY_LIMIT": "100000",
-    // Día del mes en que arranca el período (ver Umami Cloud → Settings → Usage).
-    "UMAMI_BILLING_DAY": "1"
+    // Plan Pro (desde 2026-10-06): 1M eventos por período de facturación;
+    // pasado eso, $0.00003 por evento extra.
+    "UMAMI_MONTHLY_LIMIT": "1000000",
+    // Día del mes en que arranca el período: el Pro se contrató el 6.
+    "UMAMI_BILLING_DAY": "6"
   }
 }

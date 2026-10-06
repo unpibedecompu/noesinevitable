@@ -176,7 +176,7 @@ async function checkUmami(env: Env): Promise<void> {
   const now = new Date();
   const start = billingPeriodStart(now, Number(env.UMAMI_BILLING_DAY) || 1);
   const period = start.toISOString().slice(0, 10);
-  const limit = Number(env.UMAMI_MONTHLY_LIMIT) || 100000;
+  const limit = Number(env.UMAMI_MONTHLY_LIMIT) || 1000000;
 
   let usage;
   try {
@@ -206,8 +206,10 @@ async function checkUmami(env: Env): Promise<void> {
       `  - propiedades de eventos: ${usage.properties}`,
       "",
       "Es una estimación con la API de estadísticas; el número oficial está",
-      "en Umami Cloud → Settings → Usage. Si sigue subiendo, pasar al plan Pro",
-      "($20/mes, 1M eventos) o recortar eventos (ver PROJECT_STATUS.md).",
+      "en Umami Cloud → Settings → Usage. En el plan Pro, pasado el cupo cada",
+      "evento extra se cobra ($0.00003, ~$30 por millón). Si sigue subiendo,",
+      "recortar eventos (ver PROJECT_STATUS.md → \"Recortar eventos de",
+      "analytics\") o presupuestar el excedente.",
     ],
   }));
 }
