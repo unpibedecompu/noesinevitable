@@ -33,10 +33,12 @@ const OFFICE_ORDER: Record<string, number> = {
 const REPO_URL =
   "https://github.com/fourofclubs001/unpibedecompu/tree/master/strategy/contacta_representante_latam";
 
-/** Opciones de sexo del remitente; sin elegir, el mail dice "ciudadano/a". */
-const GENDER_OPTIONS: [Gender, string][] = [
+/** Sexo del remitente: "Otro" (o no elegir) deja "ciudadano/a" en el mail. */
+type SenderGender = Gender | "otro";
+const GENDER_OPTIONS: [SenderGender, string][] = [
   ["f", "Femenino"],
   ["m", "Masculino"],
+  ["otro", "Otro"],
 ];
 
 const CHIP_CLS =
@@ -93,7 +95,7 @@ export default function ContactForm({ countries, representatives }: Props) {
   );
   const [region, setRegion] = useState<string | null>(null);
   const [name, setName] = useState("");
-  const [gender, setGender] = useState<Gender | null>(null);
+  const [gender, setGender] = useState<SenderGender | null>(null);
 
   const [subject, setSubject] = useState(SUBJECT);
   const [body, setBody] = useState("");
@@ -167,7 +169,7 @@ export default function ContactForm({ countries, representatives }: Props) {
     e.preventDefault();
     if (!country || !name.trim() || matches.length === 0) return;
     setSubject(SUBJECT);
-    if (!bodyEdited) setBody(buildBody({ userName: name.trim(), userGender: gender, countryName: country.name, regionName: region, regionLabel: country.regionLabel }));
+    if (!bodyEdited) setBody(buildBody({ userName: name.trim(), userGender: gender === "otro" ? null : gender, countryName: country.name, regionName: region, regionLabel: country.regionLabel }));
     setLastSent(null);
     setStep(2);
     trackFunnel("message_generated", {
@@ -311,7 +313,7 @@ export default function ContactForm({ countries, representatives }: Props) {
 
         <div className="mt-5">
           <span className="mb-2 block text-sm font-semibold">
-            Sexo <span className="text-ink/40">(opcional)</span>
+            Sexo
           </span>
           {/* Sólo cambia "ciudadano/a" en el mail; no se manda a analytics. */}
           <div className="flex flex-wrap gap-2">
