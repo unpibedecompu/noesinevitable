@@ -189,10 +189,14 @@
       más** en Umami). Si la API falla, avisa por mail (uno por día).
       Detalle y setup de la API key en `workers/cc-counter/README.md` →
       "Alarma de Umami".
-- [ ] **Contador en vivo en el paso 1 del formulario** ("Ya se enviaron N
-      mails a representantes"), con los mismos datos que la home (`/`)
-      (`fetchLiveCounts` en `lib/mail-stats.ts`). Prueba social justo donde
-      la gente decide escribir.
+- [x] **Contador en vivo en el paso 1 del formulario** (2026-10-07):
+      "N personas ya contactaron a sus representantes" y una barra a todo el
+      ancho con un tramo por país (`components/PeopleBar.tsx`), mismos datos
+      que la home (`fetchLiveStats` + `withBaseline`). Sólo en el paso 1, sin
+      link (para no sacar a nadie del formulario). La barra crece y el número
+      cuenta al cargar; los donuts de la home también se animan
+      (`lib/animation.ts`), y las tarjetas aparecen al scrollear
+      (`components/Reveal.tsx`).
 - [ ] **Revisar el texto debajo del título en la home (`/`)** ("Sobre esta
       iniciativa": la explicación y el párrafo de cómo funciona).
 - [ ] Reactivar más países en `lib/countries.ts` cuando haya datos
