@@ -127,8 +127,8 @@
         (`wrangler tail` mostró el evento `Email … Ok`).
       - Hecho: `cc` en todos los links de `lib/mailto.ts` (Gmail web,
         Outlook web, `mailto:`, deep links iOS/Android) vía `TRACKING_CC`, y
-        una línea en el paso 3 explicando la copia. **Falta probar los deep
-        links mobile en dispositivo real.**
+        una línea en el paso 3 explicando la copia. Deep links mobile
+        probados en dispositivo real (2026-10-07).
       - **Orden de deploy:** primero el setup de Cloudflare y la prueba del
         README, después mergear la rama. Si el sitio sale con el CC antes,
         cada copia rebota y el usuario recibe un error de entrega
