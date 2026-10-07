@@ -7,9 +7,21 @@ import { COUNTRY_COLORS, OTHER_COLOR, fetchLiveStats, withBaseline } from "@/lib
 
 const fmt = (n: number) => n.toLocaleString("es-AR");
 
+/** Texto oscuro o blanco, el que contraste más con el color del tramo. */
+function textOn(hex: string): string {
+  const n = parseInt(hex.slice(1), 16);
+  const [r, g, b] = [n >> 16, (n >> 8) & 255, n & 255].map((c) => {
+    const v = c / 255;
+    return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
+  });
+  const lum = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  return (lum + 0.05) / 0.05 > 1.05 / (lum + 0.05) ? "#14181f" : "#ffffff";
+}
+
 /**
  * "N personas ya contactaron a sus representantes" y una barra a todo el
- * ancho, con un tramo por país (mismos colores que los donuts de la home).
+ * ancho, con un tramo por país con su nombre adentro (mismos colores que
+ * los donuts de la home).
  * Arranca con la base de antes del conteo automático, atenuada, y se
  * actualiza con los totales en vivo — mismos datos que la home.
  */
@@ -56,17 +68,17 @@ export default function PeopleBar({ countries }: { countries: CountryConfig[] })
         <span className="text-base font-bold text-ink">{fmt(total)} personas</span> ya
         contactaron a sus representantes
       </p>
-      <div className="mt-2 flex h-2.5 w-full gap-0.5 overflow-hidden rounded-full" aria-hidden="true">
+      {/* Cada tramo crece según su parte, pero nunca más angosto que su nombre:
+          con muy pocas personas un país chico ocupa un poco más de lo que le toca. */}
+      <div className="mt-2 flex h-8 w-full gap-0.5 overflow-hidden rounded-lg" aria-hidden="true">
         {segments.map((s) => (
-          <div key={s.code} style={{ width: `${(s.count / total) * 100}%`, backgroundColor: s.color }} />
-        ))}
-      </div>
-      <div className="mt-1.5 flex flex-wrap gap-x-4 gap-y-1 text-xs text-ink/60" aria-hidden="true">
-        {segments.map((s) => (
-          <span key={s.code} className="inline-flex items-center gap-1.5">
-            <span className="h-2 w-2 rounded-full" style={{ backgroundColor: s.color }} />
+          <div
+            key={s.code}
+            className="flex min-w-fit items-center justify-center whitespace-nowrap px-2 text-xs font-semibold"
+            style={{ flex: `${s.count} 1 0%`, backgroundColor: s.color, color: textOn(s.color) }}
+          >
             {s.name} {fmt(s.count)}
-          </span>
+          </div>
         ))}
       </div>
     </Link>
