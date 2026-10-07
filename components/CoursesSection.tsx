@@ -3,7 +3,7 @@
 import { trackFunnel } from "@/lib/analytics";
 import { PRIMARY_COURSE, SECONDARY_COURSES } from "@/lib/courses";
 
-/** Bloque de cursos de BlueDot. Se repite en el paso 4 del formulario y en /home. */
+/** Bloque de cursos de BlueDot. Se repite en el paso 4 del formulario y en la home (/). */
 export default function CoursesSection({ location }: { location: string }) {
   return (
     <div>

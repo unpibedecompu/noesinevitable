@@ -185,7 +185,7 @@ export default function ContactForm({ countries, representatives }: Props) {
     setOpenedKeys((prev) => new Set(prev).add(repKey(rep)));
     setConfirmedSent(false);
     // Primera vez que este navegador aprieta "Enviar": cuenta como una
-    // persona en /home (sólo se manda el código de país).
+    // persona en la home (/) (sólo se manda el código de país).
     recordPerson(rep.country, region);
     trackFunnel("email_client_opened", {
       country: countryCode ?? "?",
