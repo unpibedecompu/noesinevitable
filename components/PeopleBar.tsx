@@ -4,14 +4,13 @@ import { useEffect, useState } from "react";
 import type { CountryConfig } from "@/lib/types";
 import { COUNTRY_COLORS, OTHER_COLOR, fetchLiveStats, withBaseline } from "@/lib/mail-stats";
 import { GROW_MS, useCountUp, useGrown } from "@/lib/animation";
-import Flag from "@/components/Flag";
 
 const fmt = (n: number) => n.toLocaleString("es-AR");
 
 /**
  * "N personas ya contactaron a sus representantes" y una barra a todo el
  * ancho, con un tramo por país (mismos colores que los donuts de la home) y
- * debajo bandera, cantidad y nombre de cada uno. Sin link: es para ver, no
+ * debajo cantidad y nombre de cada uno. Sin link: es para ver, no
  * para sacar a nadie del formulario. Arranca con la base de antes del conteo
  * automático, atenuada, y se actualiza con los totales en vivo — mismos datos
  * que la home. La barra crece y el número cuenta al cargar.
@@ -84,7 +83,6 @@ export default function PeopleBar({
         {segments.map((s) => (
           <span key={s.code} className="inline-flex items-center gap-1.5">
             <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: s.color }} />
-            <Flag code={s.code} />
             <span className="font-bold tabular-nums text-ink">{fmt(s.count)}</span>
             {s.name}
           </span>
