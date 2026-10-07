@@ -22,8 +22,8 @@ export default function HomePage() {
         <p className="mt-3 text-base text-ink/70">{siteCopy.explanation}</p>
         <p className="mt-3 text-base text-ink/70">
           {siteCopy.pageTitle} te ayuda a escribirle a tus representantes
-          políticos, pidiéndoles que traten los riesgos del desarrollo
-          acelerado de la inteligencia artificial como una prioridad.
+          políticos para expresarles tu preocupación por el desarrollo
+          acelerado de la IA de frontera.
         </p>
         <Link
           href="/contacta-representante/"
