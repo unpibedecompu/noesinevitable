@@ -18,6 +18,8 @@ import {
 import { trackFunnel } from "@/lib/analytics";
 import { recordPerson } from "@/lib/mail-stats";
 import { SHARE_URL, SHARE_TEXT } from "@/lib/share";
+import Reveal from "@/components/Reveal";
+import PeopleBar from "@/components/PeopleBar";
 import CoursesSection from "@/components/CoursesSection";
 import FollowSection from "@/components/FollowSection";
 
@@ -109,6 +111,7 @@ export default function ContactForm({ countries, representatives }: Props) {
   const [openedKeys, setOpenedKeys] = useState<Set<string>>(() => new Set());
   const [confirmedSent, setConfirmedSent] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [shareCopied, setShareCopied] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [isAndroid, setIsAndroid] = useState(false);
 
@@ -185,7 +188,7 @@ export default function ContactForm({ countries, representatives }: Props) {
     setOpenedKeys((prev) => new Set(prev).add(repKey(rep)));
     setConfirmedSent(false);
     // Primera vez que este navegador aprieta "Enviar": cuenta como una
-    // persona en /home (sólo se manda el código de país).
+    // persona en la home (/) (sólo se manda el código de país).
     recordPerson(rep.country, region);
     trackFunnel("email_client_opened", {
       country: countryCode ?? "?",
@@ -244,115 +247,131 @@ export default function ContactForm({ countries, representatives }: Props) {
     trackFunnel("shared", { network, location: "step4" });
   }
 
+  async function handleCopyShare() {
+    trackFunnel("shared", { network: "copy", location: "step4" });
+    try {
+      await navigator.clipboard.writeText(`${SHARE_TEXT} ${SHARE_URL}`);
+      setShareCopied(true);
+      window.setTimeout(() => setShareCopied(false), 2500);
+    } catch {
+      /* sin portapapeles: el texto queda a la vista para copiarlo a mano */
+    }
+  }
+
   /* ----------------------------- STEP 1 ----------------------------- */
   if (step === 1) {
     return (
-      <form
-        onSubmit={handleGenerate}
-        className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-ink/5 sm:p-6"
-      >
-        <StepBadge step={1} />
+      <>
+        {/* Sólo en el paso 1, donde la gente decide si escribir. El -mt-3
+            la deja a la misma distancia del header que antes de moverla acá. */}
+        <PeopleBar countries={countries} className="-mt-3 mb-8" />
+        <form
+          onSubmit={handleGenerate}
+          className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-ink/5 sm:p-6"
+        >
+          <StepBadge step={1} />
 
-        <label className="mb-2 block text-sm font-semibold">Tu país</label>
-        <div className="flex flex-wrap gap-2">
-          {countries.map((c) => (
-            <button
-              key={c.code}
-              type="button"
-              onClick={() => {
-                setCountryCode(c.code);
-                setRegion(null);
-                trackFunnel("country_selected", { country: c.code });
-              }}
-              className={`rounded-full px-3 py-1.5 text-sm transition ${
-                countryCode === c.code
-                  ? "bg-accent font-semibold text-ink"
-                  : "bg-ink/5 text-ink/70 hover:bg-ink/10"
-              }`}
-            >
-              {c.name}
-            </button>
-          ))}
-        </div>
-
-        {country && regions.length > 0 && (
-          <div className="mt-5">
-            <label htmlFor="region" className="mb-2 block text-sm font-semibold">
-              Tu {country.regionLabel.toLowerCase()}
-            </label>
-            <select
-              id="region"
-              value={region ?? ""}
-              onChange={(e) => {
-                const value = e.target.value || null;
-                setRegion(value);
-                trackFunnel("region_selected", { region: value ?? "nacional" });
-              }}
-              className="w-full rounded-lg border border-ink/15 bg-white px-3 py-2"
-            >
-              <option value="">Sólo contactar a nivel nacional</option>
-              {regions.map((r) => (
-                <option key={r} value={r}>
-                  {r}
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
-
-        <div className="mt-5">
-          <label htmlFor="name" className="mb-2 block text-sm font-semibold">
-            Tu Nombre y Apellido <span className="text-ink/40">(para firmar el mail)</span>
-          </label>
-          <input
-            id="name"
-            type="text"
-            required
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Nombre y apellido"
-            className="w-full rounded-lg border border-ink/15 bg-white px-3 py-2"
-          />
-        </div>
-
-        <div className="mt-5">
-          <span className="mb-2 block text-sm font-semibold">
-            Sexo
-          </span>
-          {/* Sólo cambia "ciudadano/a" en el mail; no se manda a analytics. */}
+          <label className="mb-2 block text-sm font-semibold">Tu país</label>
           <div className="flex flex-wrap gap-2">
-            {GENDER_OPTIONS.map(([value, label]) => (
+            {countries.map((c) => (
               <button
-                key={value}
+                key={c.code}
                 type="button"
-                aria-pressed={gender === value}
-                onClick={() => setGender(gender === value ? null : value)}
+                onClick={() => {
+                  setCountryCode(c.code);
+                  setRegion(null);
+                  trackFunnel("country_selected", { country: c.code });
+                }}
                 className={`rounded-full px-3 py-1.5 text-sm transition ${
-                  gender === value
+                  countryCode === c.code
                     ? "bg-accent font-semibold text-ink"
                     : "bg-ink/5 text-ink/70 hover:bg-ink/10"
                 }`}
               >
-                {label}
+                {c.name}
               </button>
             ))}
           </div>
-        </div>
 
-        {country && matches.length === 0 && (
-          <p className="mt-4 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-900">
-            Todavía no cargamos representantes para esta selección.
-          </p>
-        )}
+          {country && regions.length > 0 && (
+            <div className="mt-5">
+              <label htmlFor="region" className="mb-2 block text-sm font-semibold">
+                Tu {country.regionLabel.toLowerCase()}
+              </label>
+              <select
+                id="region"
+                value={region ?? ""}
+                onChange={(e) => {
+                  const value = e.target.value || null;
+                  setRegion(value);
+                  trackFunnel("region_selected", { region: value ?? "nacional" });
+                }}
+                className="w-full rounded-lg border border-ink/15 bg-white px-3 py-2"
+              >
+                <option value="">Sólo contactar a nivel nacional</option>
+                {regions.map((r) => (
+                  <option key={r} value={r}>
+                    {r}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
 
-        <button
-          type="submit"
-          disabled={!country || !name.trim() || !gender || matches.length === 0}
-          className="mt-6 w-full rounded-full bg-accent px-4 py-3 font-semibold text-ink transition hover:bg-accent-dark disabled:cursor-not-allowed disabled:opacity-40"
-        >
-          Generar mi mensaje
-        </button>
-      </form>
+          <div className="mt-5">
+            <label htmlFor="name" className="mb-2 block text-sm font-semibold">
+              Tu Nombre y Apellido <span className="text-ink/40">(para firmar el mail)</span>
+            </label>
+            <input
+              id="name"
+              type="text"
+              required
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Nombre y apellido"
+              className="w-full rounded-lg border border-ink/15 bg-white px-3 py-2"
+            />
+          </div>
+
+          <div className="mt-5">
+            <span className="mb-2 block text-sm font-semibold">
+              Sexo
+            </span>
+            {/* Sólo cambia "ciudadano/a" en el mail; no se manda a analytics. */}
+            <div className="flex flex-wrap gap-2">
+              {GENDER_OPTIONS.map(([value, label]) => (
+                <button
+                  key={value}
+                  type="button"
+                  aria-pressed={gender === value}
+                  onClick={() => setGender(gender === value ? null : value)}
+                  className={`rounded-full px-3 py-1.5 text-sm transition ${
+                    gender === value
+                      ? "bg-accent font-semibold text-ink"
+                      : "bg-ink/5 text-ink/70 hover:bg-ink/10"
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {country && matches.length === 0 && (
+            <p className="mt-4 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-900">
+              Todavía no cargamos representantes para esta selección.
+            </p>
+          )}
+
+          <button
+            type="submit"
+            disabled={!country || !name.trim() || !gender || matches.length === 0}
+            className="mt-6 w-full rounded-full bg-accent px-4 py-3 font-semibold text-ink transition hover:bg-accent-dark disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            Generar mi mensaje
+          </button>
+        </form>
+      </>
     );
   }
 
@@ -614,7 +633,9 @@ export default function ContactForm({ countries, representatives }: Props) {
   }
 
   /* ----------------------------- STEP 4 ----------------------------- */
-  const n = matches.length;
+  // Representantes distintos a los que se les abrió el mail (botón de enviar),
+  // no todos los que se mostraron en el paso 3.
+  const n = matches.filter((rep) => openedKeys.has(repKey(rep))).length;
   return (
     <div className="rounded-2xl bg-white p-5 text-center shadow-sm ring-1 ring-ink/5 sm:p-6">
       <div className="mb-3 text-left">
@@ -630,13 +651,29 @@ export default function ContactForm({ countries, representatives }: Props) {
         </button>
       </div>
       <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-accent/20 text-2xl">
-        ✓
+        {n > 0 ? "✓" : "✉"}
       </div>
-      <h2 className="text-xl font-bold">¡Gracias!</h2>
+      <h2 className="text-xl font-bold">{n > 0 ? "¡Gracias!" : "¿Te faltó enviar?"}</h2>
       <p className="mx-auto mt-2 max-w-md text-ink/70">
-        Le escribiste a <strong>{n}</strong>{" "}
-        {n === 1 ? "representante" : "representantes"}. Revisá que el mail haya
-        salido de tu casilla.
+        {n > 0 ? (
+          <>
+            Le escribiste a <strong>{n}</strong>{" "}
+            {n === 1 ? "representante" : "representantes"}. Revisá que el mail
+            haya salido de tu casilla.
+          </>
+        ) : (
+          <>
+            Podés{" "}
+            <button
+              type="button"
+              onClick={() => setStep(3)}
+              className="font-semibold text-accent-dark underline hover:text-ink"
+            >
+              volver al paso anterior
+            </button>{" "}
+            para mandar tu mail.
+          </>
+        )}
       </p>
 
       <div className="mt-6">
@@ -666,15 +703,31 @@ export default function ContactForm({ countries, representatives }: Props) {
             Compartir en Facebook
           </button>
         </div>
+
+        <p className="mt-4 text-sm text-ink/70">
+          O copiá este mensaje y mandáselo a quien quieras:
+        </p>
+        <div className="mx-auto mt-2 flex max-w-md items-start gap-2 rounded-lg border border-ink/15 bg-ink/[0.02] p-3 text-left">
+          <p className="flex-1 select-all text-sm text-ink/80">
+            {SHARE_TEXT} {SHARE_URL}
+          </p>
+          <button
+            type="button"
+            onClick={handleCopyShare}
+            className="shrink-0 rounded-full border border-ink/20 px-3 py-1 text-xs font-semibold hover:bg-ink/5"
+          >
+            {shareCopied ? "¡Copiado!" : "Copiar"}
+          </button>
+        </div>
       </div>
 
-      <div className="mt-8 border-t border-ink/10 pt-6">
+      <Reveal className="mt-8 border-t border-ink/10 pt-6">
         <CoursesSection location="step4" />
-      </div>
+      </Reveal>
 
-      <div className="mt-8 border-t border-ink/10 pt-6">
+      <Reveal className="mt-8 border-t border-ink/10 pt-6">
         <FollowSection location="step4" />
-      </div>
+      </Reveal>
 
       <button
         type="button"

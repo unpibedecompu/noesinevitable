@@ -1,71 +1,74 @@
-import { COUNTRIES, COUNTRY_CODES } from "@/lib/countries";
+import type { Metadata } from "next";
 import Link from "next/link";
-import { getRepresentatives } from "@/lib/representatives";
-import ContactForm from "@/components/ContactForm";
-import MeanwhileTeaser from "@/components/MeanwhileTeaser";
+import { DESCRIPTION } from "@/lib/site-meta";
 import siteCopy from "@/data/site-copy.json";
+import ParticipationDonuts from "@/components/ParticipationDonuts";
+import { COUNTRIES } from "@/lib/countries";
+import { getRegions } from "@/lib/representatives";
+import CoursesSection from "@/components/CoursesSection";
+import FollowSection from "@/components/FollowSection";
+import Reveal from "@/components/Reveal";
 
-// Página 100% estática. La detección de país pasó al cliente
-// (components/ContactForm → /cdn-cgi/trace, gratis en Cloudflare).
-export default function Page() {
-  const representatives = getRepresentatives().filter((r) =>
-    COUNTRY_CODES.includes(r.country),
-  );
+// La pestaña y la vista previa al compartir la home llevan el nombre del
+// proyecto; el formulario usa el título por defecto de app/layout.tsx.
+export const metadata: Metadata = {
+  title: siteCopy.pageTitle,
+  openGraph: { title: siteCopy.pageTitle, description: DESCRIPTION, type: "website" },
+  twitter: { card: "summary_large_image", title: siteCopy.pageTitle, description: DESCRIPTION },
+};
 
-  const unverified = representatives.filter((r) => !r.verified).length;
+export default function HomePage() {
+  const regionsByCountry = Object.fromEntries(COUNTRIES.map((c) => [c.code, getRegions(c.code)]));
 
   return (
     <main className="mx-auto max-w-2xl px-4 pb-16 pt-8 sm:pt-12">
       <header className="mb-8">
-        <div className="flex items-center justify-between gap-4">
-          <p className="text-sm font-semibold uppercase tracking-wide text-accent-dark">
-            {siteCopy.pageTitle}
-          </p>
-          <Link
-            href="/home"
-            className="shrink-0 rounded-md bg-accent px-3 py-1.5 text-sm font-semibold text-ink shadow-sm transition hover:bg-accent-dark"
-          >
-            Sobre esta iniciativa
-          </Link>
-        </div>
-        <h1 className="mt-1 text-3xl font-bold leading-tight sm:text-4xl">
-          {siteCopy.callToAction}
+        <p className="text-3xl font-bold uppercase tracking-wide text-accent-dark sm:text-4xl">
+          {siteCopy.pageTitle}
+        </p>
+        <h1 className="mt-1 text-xl font-bold leading-tight sm:text-2xl">
+          Sobre esta iniciativa
         </h1>
         <p className="mt-3 text-base text-ink/70">{siteCopy.explanation}</p>
-        <a
-          href={siteCopy.explanationSourceUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mt-1 block text-sm font-medium text-accent-dark underline underline-offset-2"
+        <p className="mt-3 text-base text-ink/70">
+          {siteCopy.pageTitle} te ayuda a escribirle a tus representantes
+          políticos para expresarles tu preocupación por el desarrollo
+          acelerado de la IA de frontera.
+        </p>
+        <Link
+          href="/contacta-representantes/"
+          className="mt-4 inline-block rounded-full bg-accent px-4 py-2 text-sm font-semibold text-ink transition hover:bg-accent-dark"
         >
-          {siteCopy.explanationSourceLabel}
-        </a>
-        <MeanwhileTeaser />
+          Escribile a tus representantes →
+        </Link>
       </header>
 
-      {unverified > 0 && (
-        <div className="mb-6 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-          <strong>Sólo en desarrollo:</strong> se están mostrando {unverified}{" "}
-          contacto{unverified === 1 ? "" : "s"} sin verificar (ver{" "}
-          <code>DATA_TODO.md</code>). En producción sólo aparecen los chequeados
-          contra la fuente oficial.
-        </div>
-      )}
+      <Reveal>
+        <section className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-ink/5 sm:p-6">
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-ink/50">
+            Participación
+          </h2>
 
-      <ContactForm countries={COUNTRIES} representatives={representatives} />
+          <ParticipationDonuts countries={COUNTRIES} regionsByCountry={regionsByCountry} />
+        </section>
+      </Reveal>
+
+      <Reveal className="mt-8">
+        <div className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-ink/5 sm:p-6">
+          <CoursesSection location="home" />
+        </div>
+      </Reveal>
+
+      <Reveal className="mt-8">
+        <div className="rounded-2xl bg-white p-5 text-center shadow-sm ring-1 ring-ink/5 sm:p-6">
+          <FollowSection location="home" />
+        </div>
+      </Reveal>
 
       <footer className="mt-12 border-t border-ink/10 pt-6 text-xs text-ink/50">
-        <p>
-          El mail se abre en tu propio cliente de correo (Gmail, Outlook,
-          la app de tu celular). No mandamos nada por vos y no guardamos tus
-          datos. Sólo contamos cuántos mails se mandan, con una copia a
-          registro@noesinevitable.org.
-        </p>
-        <p className="mt-2">
-          <Link href="/home" className="font-semibold text-accent-dark underline">
-            Sobre esta iniciativa →
-          </Link>
-        </p>
+        <Link href="/contacta-representantes/" className="font-semibold text-accent-dark underline">
+          Ir al formulario →
+        </Link>
       </footer>
     </main>
   );

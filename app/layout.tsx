@@ -1,10 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import Script from "next/script";
 import "./globals.css";
-
-const TITLE = "Escribile a tu representante sobre los riesgos de la IA";
-const DESCRIPTION =
-  "En menos de un minuto, mandale un mail a tus representantes políticos pidiendo que traten los riesgos del desarrollo acelerado de la inteligencia artificial. Argentina.";
+import { TITLE, DESCRIPTION } from "@/lib/site-meta";
 
 // Cloudflare Web Analytics: gratis, sin cookies, ilimitado. El token sale del
 // panel de Cloudflare después de crear el sitio; se pasa como env var al build.

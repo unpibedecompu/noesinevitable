@@ -18,7 +18,7 @@
   es por esto.
 - **Dominio propio conectado:** `noesinevitable.org` (comprado vía Cloudflare
   Registrar, agregado en Worker → Settings → Domains → Custom Domains,
-  dominio raíz sin subdominio). `SHARE_URL` en `components/ContactForm.tsx`
+  dominio raíz sin subdominio). `SHARE_URL` en `lib/share.ts`
   ya apunta ahí. El `workers.dev` sigue funcionando en paralelo.
 - Nota de acceso: para pushear a este repo hace falta la cuenta de GitHub
   **`unpibedecompu`** (dueña del repo). La cuenta `grecsoc` (activa por
@@ -176,7 +176,9 @@
 - [x] **Link a `noesinevitable.org` en el mail** — agregado como P.D. al
       final de `mailContent` (`data/site-copy.json`): dominio pelado, sin
       `https://` ni parámetros, presentado como aviso ("Le escribo a través
-      de…") y no como llamado a clickear, para no parecer phishing.
+      de…") y no como llamado a clickear, para no parecer phishing. Apunta a
+      la home (`/`); los links de compartir (`SHARE_URL` en `lib/share.ts`)
+      en cambio van directo al formulario (`/contacta-representantes/`).
 - [x] **Alarma por mail cuando se acerque el tope de eventos de Umami**
       Hecha 2026-10-06 en el mismo Worker `workers/cc-counter/`: cron diario
       (11:00 UTC) que avisa a `lucasvitali001@gmail.com` al 70% y 90% del
@@ -187,12 +189,17 @@
       más** en Umami). Si la API falla, avisa por mail (uno por día).
       Detalle y setup de la API key en `workers/cc-counter/README.md` →
       "Alarma de Umami".
-- [ ] **Contador en vivo en el paso 1 del formulario** ("Ya se enviaron N
-      mails a representantes"), con los mismos datos que /home
-      (`fetchLiveCounts` en `lib/mail-stats.ts`). Prueba social justo donde
-      la gente decide escribir.
-- [ ] **Revisar el texto debajo del título en /home** ("Sobre esta
-      iniciativa": la explicación y el párrafo de cómo funciona).
+- [x] **Contador en vivo en el paso 1 del formulario** (2026-10-07):
+      "N personas ya contactaron a sus representantes" y una barra a todo el
+      ancho con un tramo por país (`components/PeopleBar.tsx`), mismos datos
+      que la home (`fetchLiveStats` + `withBaseline`). Sólo en el paso 1, sin
+      link (para no sacar a nadie del formulario). La barra crece y el número
+      cuenta al cargar; los donuts de la home también se animan
+      (`lib/animation.ts`), y las tarjetas aparecen al scrollear
+      (`components/Reveal.tsx`).
+- [x] **Revisar el texto debajo del título en la home (`/`)** ("Sobre esta
+      iniciativa": la explicación y el párrafo de cómo funciona) — aprobado
+      por el dueño el 2026-10-07.
 - [ ] Reactivar más países en `lib/countries.ts` cuando haya datos
       verificados (ver `DATA_TODO.md`).
 
@@ -208,7 +215,7 @@
       `body_edited`, `step_back_clicked`. Mantener los del embudo principal
       (`country_selected`, `message_generated`, `email_client_opened`,
       `email_sent_confirmed`, `shared`, `course_clicked`).
-- [x] **Automatizar la visualización de /home** (2026-10-06). El gráfico
+- [x] **Automatizar la visualización de la home (`/`)** (2026-10-06). El gráfico
       muestra en vivo dos donuts (personas y mails) con filtro por país en
       chips y una tabla debajo (fila de total + una por país, o por
       provincia/departamento si se eligió un país, cada uno con su color):
@@ -217,7 +224,7 @@
       `POST /people` con sólo el código de país y marca el navegador en
       localStorage) y **mails enviados** (copias a registro@). El Worker
       `workers/cc-counter` recalcula los totales cada 15 minutos y los
-      publica en `GET /stats`; /home los pide al abrir
+      publica en `GET /stats`; la home (`/`) los pide al abrir
       (`components/ParticipationDonuts.tsx`). Las personas se cuentan por
       la región que eligieron en el formulario; los mails, por la del
       representante que los recibió ("Cargos nacionales" si es nacional). Se suma una base fija con la

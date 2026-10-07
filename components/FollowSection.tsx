@@ -4,7 +4,7 @@ import { trackFunnel } from "@/lib/analytics";
 import { INSTAGRAM_URL, NEWSLETTER_URL } from "@/lib/social";
 import siteCopy from "@/data/site-copy.json";
 
-/** Bloque de Instagram/newsletter. Se repite en el paso 4 del formulario y en /home. */
+/** Bloque de Instagram/newsletter. Se repite en el paso 4 del formulario y en la home (/). */
 export default function FollowSection({ location }: { location: string }) {
   return (
     <div>

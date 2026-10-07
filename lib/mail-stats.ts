@@ -21,6 +21,16 @@ const COUNTED_KEY = "noesinevitable:persona-contada";
 /** Región de los mails a cargos de alcance nacional (igual que en el Worker). */
 export const NATIONAL = "_nacional";
 
+// Países: paleta categórica (2 slots) validada con scripts/validate_palette.js
+// del skill de dataviz contra superficie blanca (CVD ΔE 22.5, normal-vision
+// ΔE 23.3). El nombre y el valor siempre van en texto al lado (tabla).
+export const COUNTRY_COLORS: Record<string, string> = {
+  AR: "#12b48b",
+  UY: "#2a78d6",
+};
+
+export const OTHER_COLOR = "#898781";
+
 /** Una celda de los totales: país + región (`null` = sin especificar). */
 export interface Part {
   code: string;
