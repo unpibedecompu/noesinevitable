@@ -1,33 +1,25 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import type { CountryConfig } from "@/lib/types";
 import { COUNTRY_COLORS, OTHER_COLOR, fetchLiveStats, withBaseline } from "@/lib/mail-stats";
+import { GROW_MS, useCountUp, useGrown } from "@/lib/animation";
+import Flag from "@/components/Flag";
 
 const fmt = (n: number) => n.toLocaleString("es-AR");
 
-/** Texto oscuro o blanco, el que contraste más con el color del tramo. */
-function textOn(hex: string): string {
-  const n = parseInt(hex.slice(1), 16);
-  const [r, g, b] = [n >> 16, (n >> 8) & 255, n & 255].map((c) => {
-    const v = c / 255;
-    return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
-  });
-  const lum = 0.2126 * r + 0.7152 * g + 0.0722 * b;
-  return (lum + 0.05) / 0.05 > 1.05 / (lum + 0.05) ? "#14181f" : "#ffffff";
-}
-
 /**
  * "N personas ya contactaron a sus representantes" y una barra a todo el
- * ancho, con un tramo por país con su nombre adentro (mismos colores que
- * los donuts de la home).
- * Arranca con la base de antes del conteo automático, atenuada, y se
- * actualiza con los totales en vivo — mismos datos que la home.
+ * ancho, con un tramo por país (mismos colores que los donuts de la home) y
+ * debajo bandera, cantidad y nombre de cada uno. Sin link: es para ver, no
+ * para sacar a nadie del formulario. Arranca con la base de antes del conteo
+ * automático, atenuada, y se actualiza con los totales en vivo — mismos datos
+ * que la home. La barra crece y el número cuenta al cargar.
  */
 export default function PeopleBar({ countries }: { countries: CountryConfig[] }) {
   const [stats, setStats] = useState(() => withBaseline());
   const [settled, setSettled] = useState(false);
+  const grown = useGrown();
 
   useEffect(() => {
     let cancelled = false;
@@ -53,34 +45,45 @@ export default function PeopleBar({ countries }: { countries: CountryConfig[] })
     }))
     .sort((a, b) => b.count - a.count);
   const total = segments.reduce((sum, s) => sum + s.count, 0);
+  const shown = useCountUp(total);
 
   if (total === 0) return null;
 
   return (
-    <Link
-      href="/"
-      className={`mt-5 block transition-opacity ${settled ? "" : "opacity-60"}`}
+    <div
+      className={`mt-5 transition-opacity duration-300 ${settled ? "" : "opacity-60"}`}
+      role="img"
       aria-label={`${fmt(total)} personas ya contactaron a sus representantes: ${segments
         .map((s) => `${s.name} ${fmt(s.count)}`)
-        .join(", ")}. Ver la participación.`}
+        .join(", ")}.`}
     >
-      <p className="text-sm text-ink/70">
-        <span className="text-base font-bold text-ink">{fmt(total)} personas</span> ya
-        contactaron a sus representantes
+      <p className="text-base text-ink/70" aria-hidden="true">
+        <span className="mr-1 text-3xl font-bold tabular-nums text-accent-dark">{fmt(shown)}</span>
+        personas ya contactaron a sus representantes
       </p>
-      {/* Cada tramo crece según su parte, pero nunca más angosto que su nombre:
-          con muy pocas personas un país chico ocupa un poco más de lo que le toca. */}
-      <div className="mt-2 flex h-8 w-full gap-0.5 overflow-hidden rounded-lg" aria-hidden="true">
+      <div className="mt-2 flex h-8 w-full gap-0.5 overflow-hidden rounded-lg bg-ink/5" aria-hidden="true">
         {segments.map((s) => (
           <div
             key={s.code}
-            className="flex min-w-fit items-center justify-center whitespace-nowrap px-2 text-xs font-semibold"
-            style={{ flex: `${s.count} 1 0%`, backgroundColor: s.color, color: textOn(s.color) }}
-          >
-            {s.name} {fmt(s.count)}
-          </div>
+            className="h-full transition-[width] ease-out motion-reduce:transition-none"
+            style={{
+              width: grown ? `${(s.count / total) * 100}%` : "0%",
+              backgroundColor: s.color,
+              transitionDuration: `${GROW_MS}ms`,
+            }}
+          />
         ))}
       </div>
-    </Link>
+      <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-sm text-ink/70" aria-hidden="true">
+        {segments.map((s) => (
+          <span key={s.code} className="inline-flex items-center gap-1.5">
+            <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: s.color }} />
+            <Flag code={s.code} />
+            <span className="font-bold tabular-nums text-ink">{fmt(s.count)}</span>
+            {s.name}
+          </span>
+        ))}
+      </div>
+    </div>
   );
 }
