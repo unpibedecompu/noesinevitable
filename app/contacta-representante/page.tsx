@@ -3,7 +3,6 @@ import Link from "next/link";
 import { getRepresentatives } from "@/lib/representatives";
 import ContactForm from "@/components/ContactForm";
 import MeanwhileTeaser from "@/components/MeanwhileTeaser";
-import PeopleBar from "@/components/PeopleBar";
 import Reveal from "@/components/Reveal";
 import siteCopy from "@/data/site-copy.json";
 
@@ -43,7 +42,6 @@ export default function Page() {
           {siteCopy.explanationSourceLabel}
         </a>
         <MeanwhileTeaser />
-        <PeopleBar countries={COUNTRIES} />
       </header>
 
       {unverified > 0 && (

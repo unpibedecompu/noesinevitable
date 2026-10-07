@@ -16,7 +16,13 @@ const fmt = (n: number) => n.toLocaleString("es-AR");
  * automático, atenuada, y se actualiza con los totales en vivo — mismos datos
  * que la home. La barra crece y el número cuenta al cargar.
  */
-export default function PeopleBar({ countries }: { countries: CountryConfig[] }) {
+export default function PeopleBar({
+  countries,
+  className = "",
+}: {
+  countries: CountryConfig[];
+  className?: string;
+}) {
   const [stats, setStats] = useState(() => withBaseline());
   const [settled, setSettled] = useState(false);
   const grown = useGrown();
@@ -51,7 +57,7 @@ export default function PeopleBar({ countries }: { countries: CountryConfig[] })
 
   return (
     <div
-      className={`mt-5 transition-opacity duration-300 ${settled ? "" : "opacity-60"}`}
+      className={`${className} transition-opacity duration-300 ${settled ? "" : "opacity-60"}`}
       role="img"
       aria-label={`${fmt(total)} personas ya contactaron a sus representantes: ${segments
         .map((s) => `${s.name} ${fmt(s.count)}`)
