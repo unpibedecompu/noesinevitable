@@ -9,6 +9,7 @@
     "preview": "next build && npx --yes serve out -l 4173",
     "lint": "next lint",
     "check:data": "node scripts/validate-representatives.mjs",
+    "check:senadores-ar": "node scripts/check-senadores-ar.mjs",
     "edit:mail": "node scripts/editar-mail.mjs"
   },
   "dependencies": {
