@@ -2,16 +2,15 @@
 
 import { useEffect, useMemo, useState } from "react";
 import type { CountryConfig } from "@/lib/types";
-import { NATIONAL, fetchLiveStats, withBaseline, type Part } from "@/lib/mail-stats";
+import {
+  COUNTRY_COLORS,
+  NATIONAL,
+  OTHER_COLOR,
+  fetchLiveStats,
+  withBaseline,
+  type Part,
+} from "@/lib/mail-stats";
 import DonutChart from "@/components/DonutChart";
-
-// Países: paleta categórica (2 slots) validada con scripts/validate_palette.js
-// del skill de dataviz contra superficie blanca (CVD ΔE 22.5, normal-vision
-// ΔE 23.3). El nombre y el valor siempre van en texto al lado (tabla).
-const COUNTRY_COLORS: Record<string, string> = {
-  AR: "#12b48b",
-  UY: "#2a78d6",
-};
 
 // Regiones: las 8 tonalidades de la paleta categórica del skill de dataviz,
 // más una versión oscura y una clara de cada una, para darle un color propio
@@ -32,7 +31,6 @@ const REGION_COLORS = [
 ];
 const NATIONAL_COLOR = "#52514e";
 const UNSPECIFIED_COLOR = "#a3a29c";
-const OTHER_COLOR = "#898781";
 
 const fmt = (n: number) => n.toLocaleString("es-AR");
 

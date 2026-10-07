@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getRepresentatives } from "@/lib/representatives";
 import ContactForm from "@/components/ContactForm";
 import MeanwhileTeaser from "@/components/MeanwhileTeaser";
+import PeopleBar from "@/components/PeopleBar";
 import siteCopy from "@/data/site-copy.json";
 
 // Página 100% estática. La detección de país pasó al cliente
@@ -41,6 +42,7 @@ export default function Page() {
           {siteCopy.explanationSourceLabel}
         </a>
         <MeanwhileTeaser />
+        <PeopleBar countries={COUNTRIES} />
       </header>
 
       {unverified > 0 && (
