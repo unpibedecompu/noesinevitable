@@ -26,7 +26,7 @@ export default function HomePage() {
           acelerado de la IA de frontera.
         </p>
         <Link
-          href="/contacta-representante/"
+          href="/contacta-representantes/"
           className="mt-4 inline-block rounded-full bg-accent px-4 py-2 text-sm font-semibold text-ink transition hover:bg-accent-dark"
         >
           Escribile a tus representantes →
@@ -56,7 +56,7 @@ export default function HomePage() {
       </Reveal>
 
       <footer className="mt-12 border-t border-ink/10 pt-6 text-xs text-ink/50">
-        <Link href="/contacta-representante/" className="font-semibold text-accent-dark underline">
+        <Link href="/contacta-representantes/" className="font-semibold text-accent-dark underline">
           Ir al formulario →
         </Link>
       </footer>

@@ -178,7 +178,7 @@
       `https://` ni parámetros, presentado como aviso ("Le escribo a través
       de…") y no como llamado a clickear, para no parecer phishing. Apunta a
       la home (`/`); los links de compartir (`SHARE_URL` en `lib/share.ts`)
-      en cambio van directo al formulario (`/contacta-representante/`).
+      en cambio van directo al formulario (`/contacta-representantes/`).
 - [x] **Alarma por mail cuando se acerque el tope de eventos de Umami**
       Hecha 2026-10-06 en el mismo Worker `workers/cc-counter/`: cron diario
       (11:00 UTC) que avisa a `lucasvitali001@gmail.com` al 70% y 90% del

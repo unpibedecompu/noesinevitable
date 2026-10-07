@@ -663,13 +663,13 @@ export default function ContactForm({ countries, representatives }: Props) {
           </>
         ) : (
           <>
-            Todavía no le escribiste a ningún representante.{" "}
+            Podés{" "}
             <button
               type="button"
               onClick={() => setStep(3)}
               className="font-semibold text-accent-dark underline hover:text-ink"
             >
-              Volvé al paso anterior
+              volver al paso anterior
             </button>{" "}
             para mandar tu mail.
           </>
