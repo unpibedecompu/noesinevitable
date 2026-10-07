@@ -13,7 +13,7 @@ export default function HomePage() {
   return (
     <main className="mx-auto max-w-2xl px-4 pb-16 pt-8 sm:pt-12">
       <header className="mb-8">
-        <p className="text-3xl font-semibold uppercase tracking-wide text-accent-dark sm:text-4xl">
+        <p className="text-3xl font-bold uppercase tracking-wide text-accent-dark sm:text-4xl">
           {siteCopy.pageTitle}
         </p>
         <h1 className="mt-1 text-xl font-bold leading-tight sm:text-2xl">
