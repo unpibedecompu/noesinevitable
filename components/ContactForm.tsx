@@ -111,6 +111,7 @@ export default function ContactForm({ countries, representatives }: Props) {
   const [openedKeys, setOpenedKeys] = useState<Set<string>>(() => new Set());
   const [confirmedSent, setConfirmedSent] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [shareCopied, setShareCopied] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [isAndroid, setIsAndroid] = useState(false);
 
@@ -244,6 +245,29 @@ export default function ContactForm({ countries, representatives }: Props) {
           : buildShareWhatsApp(`${SHARE_TEXT} ${SHARE_URL}`);
     window.open(url, "_blank", "noopener,noreferrer");
     trackFunnel("shared", { network, location: "step4" });
+  }
+
+  // Instagram no tiene un link para compartir con texto (como WhatsApp o X).
+  // En el celular abre el menú de compartir del sistema, que incluye
+  // Instagram; en la compu copia texto + link y abre instagram.com para pegarlo.
+  async function handleShareInstagram() {
+    trackFunnel("shared", { network: "instagram", location: "step4" });
+    if (isMobile && navigator.share) {
+      try {
+        await navigator.share({ text: SHARE_TEXT, url: SHARE_URL });
+      } catch {
+        /* cancelado por el usuario */
+      }
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(`${SHARE_TEXT} ${SHARE_URL}`);
+      setShareCopied(true);
+      window.setTimeout(() => setShareCopied(false), 4000);
+    } catch {
+      /* sin portapapeles: igual abre Instagram */
+    }
+    window.open("https://www.instagram.com/", "_blank", "noopener,noreferrer");
   }
 
   /* ----------------------------- STEP 1 ----------------------------- */
@@ -639,9 +663,9 @@ export default function ContactForm({ countries, representatives }: Props) {
         </button>
       </div>
       <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-accent/20 text-2xl">
-        ✓
+        {n > 0 ? "✓" : "✉"}
       </div>
-      <h2 className="text-xl font-bold">¡Gracias!</h2>
+      <h2 className="text-xl font-bold">{n > 0 ? "¡Gracias!" : "¿Te faltó enviar?"}</h2>
       <p className="mx-auto mt-2 max-w-md text-ink/70">
         {n > 0 ? (
           <>
@@ -689,6 +713,13 @@ export default function ContactForm({ countries, representatives }: Props) {
             className="rounded-full border border-ink/20 px-4 py-2 text-sm font-semibold hover:bg-ink/5"
           >
             Compartir en Facebook
+          </button>
+          <button
+            type="button"
+            onClick={handleShareInstagram}
+            className="rounded-full border border-ink/20 px-4 py-2 text-sm font-semibold hover:bg-ink/5"
+          >
+            {shareCopied ? "¡Link copiado! Pegalo en Instagram" : "Compartir en Instagram"}
           </button>
         </div>
       </div>
