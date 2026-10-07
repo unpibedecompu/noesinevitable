@@ -6,5 +6,8 @@
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: geolocation=(), microphone=(), camera=()
 
-/_next/static/*
-  Cache-Control: public, max-age=31536000, immutable
+# Sin "immutable" de un año en /_next/static/*: la regla también se aplica a
+# los 404, y durante un deploy hay un momento en que el HTML nuevo existe pero
+# sus archivos todavía no. Un navegador que pidió un archivo en ese momento se
+# guardaba el 404 por un año y el sitio le quedaba roto (2026-10-07). Con el
+# default de Cloudflare el navegador revalida con ETag (respuesta 304, liviana).
