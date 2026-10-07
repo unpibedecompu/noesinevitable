@@ -247,27 +247,15 @@ export default function ContactForm({ countries, representatives }: Props) {
     trackFunnel("shared", { network, location: "step4" });
   }
 
-  // Instagram no tiene un link para compartir con texto (como WhatsApp o X).
-  // En el celular abre el menú de compartir del sistema, que incluye
-  // Instagram; en la compu copia texto + link y abre instagram.com para pegarlo.
-  async function handleShareInstagram() {
-    trackFunnel("shared", { network: "instagram", location: "step4" });
-    if (isMobile && navigator.share) {
-      try {
-        await navigator.share({ text: SHARE_TEXT, url: SHARE_URL });
-      } catch {
-        /* cancelado por el usuario */
-      }
-      return;
-    }
+  async function handleCopyShare() {
+    trackFunnel("shared", { network: "copy", location: "step4" });
     try {
       await navigator.clipboard.writeText(`${SHARE_TEXT} ${SHARE_URL}`);
       setShareCopied(true);
-      window.setTimeout(() => setShareCopied(false), 4000);
+      window.setTimeout(() => setShareCopied(false), 2500);
     } catch {
-      /* sin portapapeles: igual abre Instagram */
+      /* sin portapapeles: el texto queda a la vista para copiarlo a mano */
     }
-    window.open("https://www.instagram.com/", "_blank", "noopener,noreferrer");
   }
 
   /* ----------------------------- STEP 1 ----------------------------- */
@@ -714,12 +702,21 @@ export default function ContactForm({ countries, representatives }: Props) {
           >
             Compartir en Facebook
           </button>
+        </div>
+
+        <p className="mt-4 text-sm text-ink/70">
+          O copiá este mensaje y mandáselo a quien quieras:
+        </p>
+        <div className="mx-auto mt-2 flex max-w-md items-start gap-2 rounded-lg border border-ink/15 bg-ink/[0.02] p-3 text-left">
+          <p className="flex-1 select-all text-sm text-ink/80">
+            {SHARE_TEXT} {SHARE_URL}
+          </p>
           <button
             type="button"
-            onClick={handleShareInstagram}
-            className="rounded-full border border-ink/20 px-4 py-2 text-sm font-semibold hover:bg-ink/5"
+            onClick={handleCopyShare}
+            className="shrink-0 rounded-full border border-ink/20 px-3 py-1 text-xs font-semibold hover:bg-ink/5"
           >
-            {shareCopied ? "¡Link copiado! Pegalo en Instagram" : "Compartir en Instagram"}
+            {shareCopied ? "¡Copiado!" : "Copiar"}
           </button>
         </div>
       </div>
