@@ -18,7 +18,7 @@
   es por esto.
 - **Dominio propio conectado:** `noesinevitable.org` (comprado vía Cloudflare
   Registrar, agregado en Worker → Settings → Domains → Custom Domains,
-  dominio raíz sin subdominio). `SHARE_URL` en `components/ContactForm.tsx`
+  dominio raíz sin subdominio). `SHARE_URL` en `lib/share.ts`
   ya apunta ahí. El `workers.dev` sigue funcionando en paralelo.
 - Nota de acceso: para pushear a este repo hace falta la cuenta de GitHub
   **`unpibedecompu`** (dueña del repo). La cuenta `grecsoc` (activa por
@@ -176,7 +176,9 @@
 - [x] **Link a `noesinevitable.org` en el mail** — agregado como P.D. al
       final de `mailContent` (`data/site-copy.json`): dominio pelado, sin
       `https://` ni parámetros, presentado como aviso ("Le escribo a través
-      de…") y no como llamado a clickear, para no parecer phishing.
+      de…") y no como llamado a clickear, para no parecer phishing. Desde
+      2026-10-07 apunta a `noesinevitable.org/contacta-representante` (el
+      formulario), igual que `SHARE_URL` en `lib/share.ts`.
 - [x] **Alarma por mail cuando se acerque el tope de eventos de Umami**
       Hecha 2026-10-06 en el mismo Worker `workers/cc-counter/`: cron diario
       (11:00 UTC) que avisa a `lucasvitali001@gmail.com` al 70% y 90% del

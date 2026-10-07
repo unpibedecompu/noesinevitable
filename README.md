@@ -111,7 +111,7 @@ adaptador OpenNext (pensado para SSR), lo cual falla porque este proyecto usa
    `NEXT_PUBLIC_CF_BEACON_TOKEN = <token>`. Para el embudo (Umami), agregar
    también `NEXT_PUBLIC_UMAMI_WEBSITE_ID = <website id de umami.is>`.
 4. Conectar dominio propio (Worker → Settings → Domains & Routes) y actualizar
-   `SHARE_URL` en `components/ContactForm.tsx`.
+   `SHARE_URL` en `lib/share.ts`.
 
 La detección de país usa `/cdn-cgi/trace`, que Cloudflare responde
 automáticamente en cualquier sitio que aloje. En local ese endpoint no existe →
