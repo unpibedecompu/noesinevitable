@@ -621,7 +621,9 @@ export default function ContactForm({ countries, representatives }: Props) {
   }
 
   /* ----------------------------- STEP 4 ----------------------------- */
-  const n = matches.length;
+  // Representantes distintos a los que se les abrió el mail (botón de enviar),
+  // no todos los que se mostraron en el paso 3.
+  const n = matches.filter((rep) => openedKeys.has(repKey(rep))).length;
   return (
     <div className="rounded-2xl bg-white p-5 text-center shadow-sm ring-1 ring-ink/5 sm:p-6">
       <div className="mb-3 text-left">
@@ -641,9 +643,25 @@ export default function ContactForm({ countries, representatives }: Props) {
       </div>
       <h2 className="text-xl font-bold">¡Gracias!</h2>
       <p className="mx-auto mt-2 max-w-md text-ink/70">
-        Le escribiste a <strong>{n}</strong>{" "}
-        {n === 1 ? "representante" : "representantes"}. Revisá que el mail haya
-        salido de tu casilla.
+        {n > 0 ? (
+          <>
+            Le escribiste a <strong>{n}</strong>{" "}
+            {n === 1 ? "representante" : "representantes"}. Revisá que el mail
+            haya salido de tu casilla.
+          </>
+        ) : (
+          <>
+            Todavía no le escribiste a ningún representante.{" "}
+            <button
+              type="button"
+              onClick={() => setStep(3)}
+              className="font-semibold text-accent-dark underline hover:text-ink"
+            >
+              Volvé al paso anterior
+            </button>{" "}
+            para mandar tu mail.
+          </>
+        )}
       </p>
 
       <div className="mt-6">
