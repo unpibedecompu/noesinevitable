@@ -13,10 +13,12 @@ export default function HomePage() {
   return (
     <main className="mx-auto max-w-2xl px-4 pb-16 pt-8 sm:pt-12">
       <header className="mb-8">
-        <h1 className="text-4xl font-bold leading-tight sm:text-5xl">{siteCopy.pageTitle}</h1>
-        <p className="mt-2 text-sm font-semibold uppercase tracking-wide text-accent-dark">
-          Sobre esta iniciativa
+        <p className="text-lg font-semibold uppercase tracking-wide text-accent-dark sm:text-xl">
+          {siteCopy.pageTitle}
         </p>
+        <h1 className="mt-1 text-2xl font-bold leading-tight sm:text-3xl">
+          Sobre esta iniciativa
+        </h1>
         <p className="mt-3 text-base text-ink/70">{siteCopy.explanation}</p>
         <p className="mt-3 text-base text-ink/70">
           {siteCopy.pageTitle} te ayuda a escribirle a tus representantes
