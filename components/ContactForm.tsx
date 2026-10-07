@@ -18,6 +18,7 @@ import {
 import { trackFunnel } from "@/lib/analytics";
 import { recordPerson } from "@/lib/mail-stats";
 import { SHARE_URL, SHARE_TEXT } from "@/lib/share";
+import Reveal from "@/components/Reveal";
 import CoursesSection from "@/components/CoursesSection";
 import FollowSection from "@/components/FollowSection";
 
@@ -668,13 +669,13 @@ export default function ContactForm({ countries, representatives }: Props) {
         </div>
       </div>
 
-      <div className="mt-8 border-t border-ink/10 pt-6">
+      <Reveal className="mt-8 border-t border-ink/10 pt-6">
         <CoursesSection location="step4" />
-      </div>
+      </Reveal>
 
-      <div className="mt-8 border-t border-ink/10 pt-6">
+      <Reveal className="mt-8 border-t border-ink/10 pt-6">
         <FollowSection location="step4" />
-      </div>
+      </Reveal>
 
       <button
         type="button"

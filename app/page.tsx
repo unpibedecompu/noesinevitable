@@ -5,6 +5,7 @@ import { COUNTRIES } from "@/lib/countries";
 import { getRegions } from "@/lib/representatives";
 import CoursesSection from "@/components/CoursesSection";
 import FollowSection from "@/components/FollowSection";
+import Reveal from "@/components/Reveal";
 
 export default function HomePage() {
   const regionsByCountry = Object.fromEntries(COUNTRIES.map((c) => [c.code, getRegions(c.code)]));
@@ -32,21 +33,27 @@ export default function HomePage() {
         </Link>
       </header>
 
-      <section className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-ink/5 sm:p-6">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-ink/50">
-          Participación
-        </h2>
+      <Reveal>
+        <section className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-ink/5 sm:p-6">
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-ink/50">
+            Participación
+          </h2>
 
-        <ParticipationDonuts countries={COUNTRIES} regionsByCountry={regionsByCountry} />
-      </section>
+          <ParticipationDonuts countries={COUNTRIES} regionsByCountry={regionsByCountry} />
+        </section>
+      </Reveal>
 
-      <div className="mt-8 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-ink/5 sm:p-6">
-        <CoursesSection location="home" />
-      </div>
+      <Reveal className="mt-8">
+        <div className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-ink/5 sm:p-6">
+          <CoursesSection location="home" />
+        </div>
+      </Reveal>
 
-      <div className="mt-8 rounded-2xl bg-white p-5 text-center shadow-sm ring-1 ring-ink/5 sm:p-6">
-        <FollowSection location="home" />
-      </div>
+      <Reveal className="mt-8">
+        <div className="rounded-2xl bg-white p-5 text-center shadow-sm ring-1 ring-ink/5 sm:p-6">
+          <FollowSection location="home" />
+        </div>
+      </Reveal>
 
       <footer className="mt-12 border-t border-ink/10 pt-6 text-xs text-ink/50">
         <Link href="/contacta-representante/" className="font-semibold text-accent-dark underline">
