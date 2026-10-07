@@ -197,8 +197,9 @@
       cuenta al cargar; los donuts de la home también se animan
       (`lib/animation.ts`), y las tarjetas aparecen al scrollear
       (`components/Reveal.tsx`).
-- [ ] **Revisar el texto debajo del título en la home (`/`)** ("Sobre esta
-      iniciativa": la explicación y el párrafo de cómo funciona).
+- [x] **Revisar el texto debajo del título en la home (`/`)** ("Sobre esta
+      iniciativa": la explicación y el párrafo de cómo funciona) — aprobado
+      por el dueño el 2026-10-07.
 - [ ] Reactivar más países en `lib/countries.ts` cuando haya datos
       verificados (ver `DATA_TODO.md`).
 

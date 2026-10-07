@@ -1,4 +1,6 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+import { DESCRIPTION } from "@/lib/site-meta";
 import siteCopy from "@/data/site-copy.json";
 import ParticipationDonuts from "@/components/ParticipationDonuts";
 import { COUNTRIES } from "@/lib/countries";
@@ -6,6 +8,14 @@ import { getRegions } from "@/lib/representatives";
 import CoursesSection from "@/components/CoursesSection";
 import FollowSection from "@/components/FollowSection";
 import Reveal from "@/components/Reveal";
+
+// La pestaña y la vista previa al compartir la home llevan el nombre del
+// proyecto; el formulario usa el título por defecto de app/layout.tsx.
+export const metadata: Metadata = {
+  title: siteCopy.pageTitle,
+  openGraph: { title: siteCopy.pageTitle, description: DESCRIPTION, type: "website" },
+  twitter: { card: "summary_large_image", title: siteCopy.pageTitle, description: DESCRIPTION },
+};
 
 export default function HomePage() {
   const regionsByCountry = Object.fromEntries(COUNTRIES.map((c) => [c.code, getRegions(c.code)]));
