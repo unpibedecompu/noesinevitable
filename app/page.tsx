@@ -29,7 +29,7 @@ export default function HomePage() {
           href="/contacta-representante/"
           className="mt-4 inline-block rounded-full bg-accent px-4 py-2 text-sm font-semibold text-ink transition hover:bg-accent-dark"
         >
-          Escribile a tu representante →
+          Escribile a tus representantes →
         </Link>
       </header>
 
